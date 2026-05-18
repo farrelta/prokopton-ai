@@ -12,14 +12,17 @@ import { getJournal } from '@/lib/journal';
 
 interface ReflectionFlowProps {
   initialInput?: string;
+  initialTitle?: string;
   onClearedContext?: () => void;
 }
 
-export default function ReflectionFlow({ initialInput, onClearedContext }: ReflectionFlowProps) {
+export default function ReflectionFlow({ initialInput, initialTitle, onClearedContext }: ReflectionFlowProps) {
   const { t, language } = useLanguage();
   const [step, setStep] = useState<'mode' | 'input' | 'loading' | 'result'>('mode');
   const [selectedMode, setSelectedMode] = useState<PhilosophyMode>(PhilosophyMode.AUTOMATIC);
   const [input, setInput] = useState('');
+  const [journalTitle, setJournalTitle] = useState<string | null>(null);
+  const [loadingTitle, setLoadingTitle] = useState<string>('');
   const [result, setResult] = useState<ReflectionResponse | null>(null);
   const [lastJournalEntry, setLastJournalEntry] = reactState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -35,6 +38,7 @@ export default function ReflectionFlow({ initialInput, onClearedContext }: Refle
     // If initialInput is provided (even if empty string ''), jump to input step
     if (initialInput !== undefined && initialInput !== null) {
       setInput(initialInput); // eslint-disable-line react-hooks/set-state-in-effect
+      setJournalTitle(initialTitle || null);
       setStep('input');  
       
       // Focus the input after a short delay for animation/tab switch
@@ -44,7 +48,7 @@ export default function ReflectionFlow({ initialInput, onClearedContext }: Refle
         }
       }, 500);
     }
-  }, [initialInput]);
+  }, [initialInput, initialTitle]);
 
   const MODES = [
     { id: PhilosophyMode.AUTOMATIC, icon: Sparkles, desc: t.reflection.modes.automatic },
@@ -57,14 +61,45 @@ export default function ReflectionFlow({ initialInput, onClearedContext }: Refle
     { id: PhilosophyMode.MODERN_PSYCHOLOGY, icon: Brain, desc: t.reflection.modes.modern_psychology },
   ];
 
+  // Handle periodic loading title changes
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (step === 'loading') {
+      const titles = t.reflection.loadingTitles || [t.reflection.loadingTitle];
+      interval = setInterval(() => {
+        setLoadingTitle(prev => {
+          const currentIndex = titles.indexOf(prev);
+          const nextIndex = (currentIndex + 1) % titles.length;
+          return titles[nextIndex];
+        });
+      }, 3500);
+    }
+    return () => clearInterval(interval);
+  }, [step, t.reflection.loadingTitles, t.reflection.loadingTitle]);
+
   const handleStartReflecting = async (customInput?: string, customMode?: PhilosophyMode) => {
     const finalInput = customInput || input;
     const finalMode = customMode || selectedMode;
 
     if (!finalInput.trim()) return;
+
+    // Pick a random loading title
+    const titles = t.reflection.loadingTitles || [t.reflection.loadingTitle];
+    const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+    setLoadingTitle(randomTitle);
+
     setStep('loading');
     try {
-      const data = await getReflection(finalInput, finalMode, language);
+      const journal = getJournal();
+      const historyContext = journal
+        .filter(e => !!e.result)
+        .slice(0, 5)
+        .map(e => ({
+          dominantTheme: e.result?.dominantTheme || '',
+          emotionalPatterns: e.result?.emotionalPatterns || []
+        }));
+
+      const data = await getReflection(finalInput, finalMode, language, historyContext);
       setResult(data);
       setStep('result');
       if (onClearedContext) onClearedContext();
@@ -229,7 +264,7 @@ export default function ReflectionFlow({ initialInput, onClearedContext }: Refle
             </div>
             <div className="text-center space-y-2">
               <p className="text-2xl font-serif italic text-white text-balance">
-                {t.reflection.loadingTitle}
+                {loadingTitle || t.reflection.loadingTitle}
               </p>
               <p className="text-sage font-cormorant text-lg uppercase tracking-widest">
                 {t.reflection.loadingSub} {selectedMode}
@@ -244,6 +279,7 @@ export default function ReflectionFlow({ initialInput, onClearedContext }: Refle
             input={input}
             mode={selectedMode}
             result={result} 
+            forceTitle={journalTitle || undefined}
             onBack={reset} 
             onContinue={handleContinue}
             onChangeLens={(newMode) => {

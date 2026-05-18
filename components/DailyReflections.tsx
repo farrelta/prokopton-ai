@@ -6,7 +6,7 @@ import { Sun, Wind, Moon, Coffee, Sparkles, CheckCircle2, Calendar } from 'lucid
 import { useLanguage } from '@/lib/LanguageContext';
 
 interface DailyReflectionsProps {
-  onReflect?: (text: string) => void;
+  onReflect?: (text: string, title?: string) => void;
 }
 
 import { saveToJournal } from '@/lib/journal';
@@ -86,8 +86,12 @@ export default function DailyReflections({ onReflect }: DailyReflectionsProps) {
     }
     
     saveToJournal({
-      title: `Daily Reflection: ${theme.title}`,
-      input: reflectionInput
+      title: "Daily Reflection",
+      input: reflectionInput,
+      result: {
+        reflectionPrompt: theme.quote,
+        entryTitle: "Daily Reflection"
+      } as any
     });
     
     setReflectionInput('');
@@ -97,7 +101,7 @@ export default function DailyReflections({ onReflect }: DailyReflectionsProps) {
 
   const handleQuoteClick = () => {
     if (onReflect) {
-      onReflect(theme.quote);
+      onReflect(theme.quote, "Daily Reflection");
     }
   };
 

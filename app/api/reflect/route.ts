@@ -28,6 +28,25 @@ PERSONALITY & TONE:
 - Calm, warm, emotionally mature, grounded, thoughtful, concise but meaningful, non-judgmental.
 - Avoid sounding: robotic, overly cheerful, preachy, dramatic, or clinical.
 
+RESPONSE CONSISTENCY & REFLECTION MEMORY SYSTEM:
+- Maintain philosophical consistency and emotional authenticity.
+- Do NOT generate completely random philosophical interpretations every time.
+- The philosophy foundation should remain stable.
+- If the user submits the same emotional pattern, the same philosophy lens, or a very similar situation:
+    - preserve the same core philosophical principle.
+    - maintain consistent emotional guidance.
+    - avoid contradicting previous reflections (if context provided).
+    - keep the philosophical interpretation stable.
+- Stable Layer (should remain consistent): philosophy principle, emotional interpretation, control mapping, core reflection direction.
+- Dynamic Layer (may vary slightly): emotional acknowledgment wording, reflection phrasing, grounding tone, reflection prompts.
+
+PHILOSOPHY CONSISTENCY RULES:
+- Stoicism: focus on control, resilience, acceptance of uncertainty, disciplined thinking.
+- Buddhism: focus on attachment, suffering, mindfulness, non-attachment.
+- Taoism: focus on flow, harmony, non-forcing, acceptance of natural uncertainty.
+- Existentialism: focus on meaning, responsibility, identity, personal freedom.
+- Minimalism: focus on simplicity, reduction of overwhelm, intentional focus.
+
 RESPONSE FLOW & STRUCTURE (JSON):
 1. acknowledgment: Short calming acknowledgment.
 2. emotionalInsight: Briefly identify the emotional or thinking pattern (non-clinical).
@@ -36,12 +55,11 @@ RESPONSE FLOW & STRUCTURE (JSON):
 5. emotionalPatterns: Array of 1-3 tags summarizing patterns (e.g. ["burnout", "uncertainty"]).
 6. reflectionSummary: A one-sentence summary of the core insight.
 7. primaryPhilosophyName: Name of the primary philosophy lens chosen (e.g., Stoicism, Buddhism).
-7. perspective: Explain the primary perspective simply and practically.
-8. controlMapping: Object with "within" (list of controllable actions/thoughts) and "outside" (list of uncontrollable factors).
-9. nextSteps: 3–5 small practical actions.
-10. reflectionPrompt: ONE meaningful reflection question to deepen awareness.
-11. alternativeLenses: List of objects, each with "philosophy" (name) and "perspective" (1 short sentence reinterpretion). Cover 3-4 other lenses.
-12. continuationOptions: 3-5 short probable following question from user to AI to continue.
+8. perspective: Explain the primary perspective simply and practically.
+9. controlMapping: Object with "within" (list of controllable actions/thoughts) and "outside" (list of uncontrollable factors).
+10. nextSteps: 3–5 small practical actions.
+11. reflectionPrompt: ONE meaningful reflection question to deepen awareness.
+12. alternativeLenses: List of objects, each with "philosophy" (name) and "perspective" (1 short sentence reinterpretion). Cover 3-4 other lenses.
 
 PHILOSOPHICAL FRAMEWORKS:
 Stoicism, Buddhism, Taoism, Existentialism, Minimalism, Modern reflective psychology, Confucianism, Islamic wisdom traditions.
@@ -51,10 +69,14 @@ If the user expresses self-harm, suicidal thoughts, or danger, encourage seeking
 
 const AI_PROVIDER = process.env.AI_PROVIDER || "gemini";
 
-async function callGemini(prompt: string, mode: string, languageInstruction: string) {
+async function callGemini(prompt: string, mode: string, languageInstruction: string, history?: any[]) {
+  const historyContext = history && history.length > 0 
+    ? `\n\nRecent context of user's emotional themes and patterns for consistency: ${JSON.stringify(history)}`
+    : "";
+
   const response = await ai.models.generateContent({
     model: DEFAULT_MODEL,
-    contents: `User is feeling: "${prompt}". Please use the lens of ${mode} to help them reflect. If the mode is "Automatic Recommendation Mode", analyze and choose the best lens. \n\n${languageInstruction}`,
+    contents: `User is feeling: "${prompt}". Please use the lens of ${mode} to help them reflect. If the mode is "Automatic Recommendation Mode", analyze and choose the best lens. ${historyContext}\n\n${languageInstruction}`,
     config: {
       systemInstruction: SYSTEM_PROMPT,
       responseMimeType: "application/json",
@@ -93,10 +115,6 @@ async function callGemini(prompt: string, mode: string, languageInstruction: str
               required: ["philosophy", "perspective"]
             }
           },
-          continuationOptions: { 
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
-          },
         },
         required: [
           "acknowledgment", 
@@ -110,8 +128,7 @@ async function callGemini(prompt: string, mode: string, languageInstruction: str
           "controlMapping",
           "nextSteps", 
           "reflectionPrompt", 
-          "alternativeLenses",
-          "continuationOptions"
+          "alternativeLenses"
         ]
       }
     }
@@ -121,10 +138,14 @@ async function callGemini(prompt: string, mode: string, languageInstruction: str
   return JSON.parse(text);
 }
 
-async function callOpenAICompatible(provider: "openrouter" | "groq", prompt: string, mode: string, languageInstruction: string) {
+async function callOpenAICompatible(provider: "openrouter" | "groq", prompt: string, mode: string, languageInstruction: string, history?: any[]) {
   let apiKey = "";
   let model = "";
   let url = "";
+
+  const historyContext = history && history.length > 0 
+    ? `\n\nRecent context of user's emotional themes and patterns for consistency: ${JSON.stringify(history)}`
+    : "";
 
   if (provider === "openrouter") {
     apiKey = process.env.OPENROUTER_API_KEY || "";
@@ -152,7 +173,7 @@ async function callOpenAICompatible(provider: "openrouter" | "groq", prompt: str
       model: model,
       messages: [
         { role: "system", content: `${SYSTEM_PROMPT}\n\nReturn strictly valid JSON only. No extra text.` },
-        { role: "user", content: `User is feeling: "${prompt}". Please use the lens of ${mode} to help them reflect. If the mode is "Automatic Recommendation Mode", analyze and choose the best lens. \n\n${languageInstruction}` }
+        { role: "user", content: `User is feeling: "${prompt}". Please use the lens of ${mode} to help them reflect. If the mode is "Automatic Recommendation Mode", analyze and choose the best lens. ${historyContext}\n\n${languageInstruction}` }
       ],
       response_format: { type: "json_object" }
     })
@@ -170,7 +191,7 @@ async function callOpenAICompatible(provider: "openrouter" | "groq", prompt: str
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, mode, language } = await req.json();
+    const { prompt, mode, language, history } = await req.json();
     const languageInstruction = `CRITICAL: You MUST respond in the following language: ${language === 'id' ? 'Indonesian' : 'English'}. The entire JSON response (except for keys) must be translated to this language.`;
 
     const providers = ["gemini", "groq", "openrouter"];
@@ -194,9 +215,9 @@ export async function POST(req: NextRequest) {
         console.log(`Attempting reflection with ${provider}...`);
         let data;
         if (provider === "gemini") {
-          data = await callGemini(prompt, mode, languageInstruction);
+          data = await callGemini(prompt, mode, languageInstruction, history);
         } else if (provider === "groq" || provider === "openrouter") {
-          data = await callOpenAICompatible(provider as "groq" | "openrouter", prompt, mode, languageInstruction);
+          data = await callOpenAICompatible(provider as "groq" | "openrouter", prompt, mode, languageInstruction, history);
         }
         
         if (data) {

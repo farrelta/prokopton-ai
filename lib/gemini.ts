@@ -28,14 +28,13 @@ export interface ReflectionResponse {
     philosophy: string;
     perspective: string;
   }[];
-  continuationOptions: string[];
 }
 
-export async function getReflection(prompt: string, mode: PhilosophyMode, language: string = 'en'): Promise<ReflectionResponse> {
+export async function getReflection(prompt: string, mode: PhilosophyMode, language: string = 'en', history?: { dominantTheme: string, emotionalPatterns: string[] }[]): Promise<ReflectionResponse> {
   const response = await fetch('/api/reflect', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, mode, language })
+    body: JSON.stringify({ prompt, mode, language, history })
   });
 
   if (!response.ok) {

@@ -69,8 +69,11 @@ export default function Home() {
     }, 100);
   };
 
-  const handleLoadContext = (text: string) => {
+  const [journalTitle, setJournalTitle] = useState<string | null>(null);
+
+  const handleLoadContext = (text: string, title?: string) => {
     setJournalContext(text);
+    setJournalTitle(title || null);
     setActiveTab('home');
     scrollToReflect(false);
   };
@@ -79,6 +82,7 @@ export default function Home() {
     setActiveTab('home');
     setIsMenuOpen(false);
     setJournalContext('');
+    setJournalTitle(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -223,7 +227,14 @@ export default function Home() {
               </section>
 
               <section id="reflect">
-                <ReflectionFlow initialInput={journalContext || undefined} onClearedContext={() => setJournalContext(null)} />
+                <ReflectionFlow 
+                  initialInput={journalContext || undefined} 
+                  initialTitle={journalTitle || undefined}
+                  onClearedContext={() => {
+                    setJournalContext(null);
+                    setJournalTitle(null);
+                  }} 
+                />
               </section>
             </motion.div>
           )}

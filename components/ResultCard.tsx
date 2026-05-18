@@ -10,23 +10,29 @@ interface ResultCardProps {
   input: string;
   mode: PhilosophyMode;
   result: ReflectionResponse;
+  forceTitle?: string;
   onBack: () => void;
   onContinue: (option: string) => void;
   onChangeLens?: (mode: PhilosophyMode) => void;
 }
 
-export default function ResultCard({ input, mode, result, onBack, onContinue, onChangeLens }: ResultCardProps) {
+export default function ResultCard({ input, mode, result, forceTitle, onBack, onContinue, onChangeLens }: ResultCardProps) {
   const { t } = useLanguage();
   const [isSaved, setIsSaved] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [reflectionAnswer, setReflectionAnswer] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Check if current interaction is already in journal
+    // Only check if we are NOT in a forced context (like daily reflection revisit)
+    if (forceTitle) return;
+    
     const journal = getJournal();
     const existing = journal.find(e => e.input === input && e.mode === mode);
-    if (existing) setIsSaved(true); // eslint-disable-line react-hooks/set-state-in-effect
-  }, [input, mode]);
+    // Remove automatic isSaved setting to allow consistent UI state
+    // and let user save multiple times if they wish as requested
+  }, [input, mode, forceTitle]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,12 +45,15 @@ export default function ResultCard({ input, mode, result, onBack, onContinue, on
   }, []);
 
   const handleSave = () => {
-    if (isSaved) return;
     saveToJournal({ 
-      title: result.entryTitle,
+      title: forceTitle || result.entryTitle,
       input, 
       mode, 
-      result 
+      result: {
+        ...result,
+        entryTitle: forceTitle || result.entryTitle
+      },
+      reflectionAnswer
     });
     setIsSaved(true);
   };
@@ -64,17 +73,6 @@ export default function ResultCard({ input, mode, result, onBack, onContinue, on
           {t.common.backToReflection}
         </button>
         <div className="flex items-center gap-4">
-          <button
-            onClick={handleSave}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all text-[10px] uppercase tracking-widest font-bold shadow-lg ${
-              isSaved 
-                ? 'bg-beige/10 border-beige text-beige pointer-events-none' 
-                : 'bg-beige border-beige text-forest hover:bg-white hover:border-white'
-            }`}
-          >
-            {isSaved ? <BookmarkCheck className="w-3 h-3" /> : <Bookmark className="w-3 h-3" />}
-            {isSaved ? t.common.journalSaved : t.common.saveToJournal}
-          </button>
           <div className="hidden md:flex items-center gap-2 text-sage/60">
             <Sparkles className="w-4 h-4" />
             <span className="uppercase text-[10px] tracking-widest font-bold text-white/50">{t.common.aiActive}</span>
@@ -130,7 +128,7 @@ export default function ResultCard({ input, mode, result, onBack, onContinue, on
             <span className="px-3 py-1 bg-sage/20 text-forest rounded-full text-[10px] font-bold uppercase tracking-widest">
               {result.dominantTheme}
             </span>
-            {result.emotionalPatterns.map((pattern, i) => (
+            {result.emotionalPatterns?.map((pattern, i) => (
                <span key={i} className="px-3 py-1 border border-forest/10 text-forest/60 rounded-full text-[10px] font-bold uppercase tracking-widest hidden sm:inline-block">
                 {pattern}
               </span>
@@ -173,13 +171,13 @@ export default function ResultCard({ input, mode, result, onBack, onContinue, on
                 <div className="p-4 bg-sage/5 rounded-2xl">
                   <span className="text-[10px] font-bold text-sage uppercase tracking-wider mb-2 block">Within Your Control</span>
                   <ul className="space-y-1 text-sm text-dark/70">
-                    {result.controlMapping.within.map((item, i) => <li key={i}>• {item}</li>)}
+                    {result.controlMapping?.within?.map((item, i) => <li key={i}>• {item}</li>)}
                   </ul>
                 </div>
                 <div className="p-4 bg-stone-100 rounded-2xl">
                   <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 block">Outside Your Control</span>
                   <ul className="space-y-1 text-sm text-dark/50">
-                    {result.controlMapping.outside.map((item, i) => <li key={i}>• {item}</li>)}
+                    {result.controlMapping?.outside?.map((item, i) => <li key={i}>• {item}</li>)}
                   </ul>
                 </div>
               </div>
@@ -191,7 +189,7 @@ export default function ResultCard({ input, mode, result, onBack, onContinue, on
                 4. Grounded Next Steps
               </h4>
               <ul className="space-y-4">
-                {result.nextSteps.map((step, i) => (
+                {result.nextSteps?.map((step, i) => (
                   <li key={i} className="flex gap-3 text-sm lg:text-base leading-snug text-dark/70 font-inter">
                     <span className="text-sage font-bold text-xs mt-1">{i + 1}.</span>
                     {step}
@@ -209,7 +207,7 @@ export default function ResultCard({ input, mode, result, onBack, onContinue, on
             Quick Switch to Another Lens
           </h4>
           <div className="grid lg:grid-cols-2 gap-6">
-            {result.alternativeLenses.map((lens, i) => (
+            {result.alternativeLenses?.map((lens, i) => (
               <button 
                 key={i} 
                 onClick={() => {
@@ -230,39 +228,44 @@ export default function ResultCard({ input, mode, result, onBack, onContinue, on
         <div className="mt-10 bg-forest text-beige p-6 lg:p-8 rounded-2xl lg:rounded-[32px] shadow-xl">
           <h4 className="text-[10px] font-bold text-beige/40 uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
             <Quote className="w-3 h-3" />
-            Reflection Prompt
+            {t.common.reflectionQuestion}
           </h4>
-          <p className="serif text-lg lg:text-xl italic leading-snug font-medium text-white text-center">
+          <p className="serif text-lg lg:text-xl italic leading-snug font-medium text-white text-center mb-8">
             &ldquo;{result.reflectionPrompt}&rdquo;
           </p>
+          
+          <div className="relative group">
+            <textarea
+              value={reflectionAnswer}
+              onChange={(e) => setReflectionAnswer(e.target.value)}
+              placeholder={t.common.reflectionAnswerPlaceholder}
+              className="w-full min-h-[120px] p-6 rounded-2xl bg-white/5 border border-white/10 focus:border-beige/30 focus:ring-0 transition-all text-beige text-lg font-cormorant resize-none"
+            />
+          </div>
         </div>
 
-        {/* Continuation Options */}
-        <div className="mt-14 pt-10 border-t border-forest/5">
-          <h4 className="text-[10px] font-bold text-sage uppercase tracking-[0.2em] mb-6 text-center lg:text-left">
-            {t.common.continue}
-          </h4>
-          <div className="flex flex-wrap gap-2 lg:gap-3 justify-center lg:justify-start mb-10">
-            {result.continuationOptions.map((option, i) => (
-              <button
-                key={i}
-                onClick={() => onContinue(option)}
-                className="px-4 lg:px-5 py-2 rounded-full border border-forest/10 hover:bg-forest hover:text-beige hover:border-forest transition-all text-xs lg:text-sm font-medium text-forest/60"
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            <p className="serif text-xs italic text-forest/40 text-center lg:text-left">
-              The soul becomes dyed with the color of its thoughts.
-            </p>
+        {/* Action Bar */}
+        <div className="mt-14 pt-10 border-t border-forest/5 flex flex-col lg:flex-row items-center justify-between gap-6">
+          <p className="serif text-xs italic text-forest/40 text-center lg:text-left">
+            The soul becomes dyed with the color of its thoughts.
+          </p>
+          <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-4">
             <button
               onClick={onBack}
-              className="w-full lg:w-auto px-8 py-3.5 bg-forest text-beige rounded-full text-xs lg:text-sm font-semibold hover:opacity-90 transition-all shadow-2xl scale-100"
+              className="px-8 py-3.5 border border-forest/10 text-forest rounded-full text-xs lg:text-sm font-semibold hover:bg-forest/5 transition-all"
             >
               {t.common.startNew}
+            </button>
+            <button
+              onClick={handleSave}
+              className={`px-8 py-3.5 rounded-full text-xs lg:text-sm font-semibold transition-all shadow-xl flex items-center justify-center gap-2 ${
+                isSaved 
+                  ? 'bg-beige/20 border border-beige/30 text-forest' 
+                  : 'bg-forest text-beige hover:opacity-90'
+              }`}
+            >
+              <Bookmark className="w-4 h-4" />
+              {t.common.saveToJournal}
             </button>
           </div>
         </div>

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Book, Trash2, Calendar, ChevronRight, History, Plus, Edit3, Save, X, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { getJournal, JournalEntry, deleteFromJournal, saveToJournal, updateJournalEntry, analyzeJournalHistory } from '@/lib/journal';
+import { getJournal, JournalEntry, deleteFromJournal, saveToJournal, updateJournalEntry, analyzeJournalHistory, getAIJournalAnalysis, JournalAnalysis, getStoredAnalysis } from '@/lib/journal';
 
 interface JournalProps {
-  onLoadContext: (text: string) => void;
+  onLoadContext: (text: string, title?: string) => void;
 }
 
 export default function Journal({ onLoadContext }: JournalProps) {
@@ -13,15 +13,60 @@ export default function Journal({ onLoadContext }: JournalProps) {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<{ title: string; content: string }>({ title: '', content: '' });
+  const [editData, setEditData] = useState<{ title: string; content: string; reflectionAnswer: string }>({ 
+    title: '', 
+    content: '', 
+    reflectionAnswer: '' 
+  });
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<JournalAnalysis | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [hasRequestedAnalysis, setHasRequestedAnalysis] = useState(false);
 
   useEffect(() => {
     const journal = getJournal();
     setEntries(journal); // eslint-disable-line react-hooks/set-state-in-effect
+    
+    // Load stored analysis
+    const stored = getStoredAnalysis();
+    if (stored) {
+      setAiAnalysis(stored);
+    }
   }, []);
 
-  const analysis = React.useMemo(() => analyzeJournalHistory(entries), [entries]);
+  const handleRequestAnalysis = () => {
+    setHasRequestedAnalysis(true);
+  };
+
+  const entriesSinceLastAnalysis = React.useMemo(() => {
+    if (!aiAnalysis) return entries.length;
+    return entries.length - aiAnalysis.entryCountAtAnalysis;
+  }, [entries.length, aiAnalysis]);
+
+  const canRequestNewAnalysis = entriesSinceLastAnalysis >= 5;
+
+  useEffect(() => {
+    if (hasRequestedAnalysis && !isAnalyzing && canRequestNewAnalysis) {
+      const fetchAnalysis = async () => {
+        setIsAnalyzing(true);
+        const result = await getAIJournalAnalysis(entries, language);
+        if (result) {
+          setAiAnalysis(result);
+        }
+        setIsAnalyzing(false);
+        setHasRequestedAnalysis(false);
+      };
+      fetchAnalysis();
+    }
+  }, [entries, language, hasRequestedAnalysis, isAnalyzing, canRequestNewAnalysis]);
+
+  const stats = React.useMemo(() => {
+    return {
+      total: entries.length,
+      last: entries[0]?.timestamp,
+      topThemes: analyzeJournalHistory(entries)?.topThemes || []
+    };
+  }, [entries]);
 
   const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,7 +95,7 @@ export default function Journal({ onLoadContext }: JournalProps) {
     setEntries([saved, ...entries]);
     setSelectedEntry(saved);
     setIsEditing(true);
-    setEditData({ title: saved.title || '', content: saved.input });
+    setEditData({ title: saved.title || '', content: saved.input, reflectionAnswer: '' });
   };
 
   const startEdit = () => {
@@ -58,7 +103,8 @@ export default function Journal({ onLoadContext }: JournalProps) {
     setIsEditing(true);
     setEditData({ 
       title: selectedEntry.title || (selectedEntry.mode ? `${selectedEntry.mode} reflection` : 'Untitled'), 
-      content: selectedEntry.input 
+      content: selectedEntry.input,
+      reflectionAnswer: selectedEntry.reflectionAnswer || ''
     });
   };
 
@@ -75,7 +121,8 @@ export default function Journal({ onLoadContext }: JournalProps) {
 
     const updates = { 
       title: editData.title.trim() ? editData.title : (selectedEntry.mode ? `${selectedEntry.mode} reflection` : 'Untitled'), 
-      input: editData.content 
+      input: editData.content,
+      reflectionAnswer: editData.reflectionAnswer
     };
     updateJournalEntry(selectedEntry.id, updates);
     
@@ -98,61 +145,166 @@ export default function Journal({ onLoadContext }: JournalProps) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Pattern Recognition Summary */}
+      {/* Periodic Perspective Section */}
       <AnimatePresence>
-        {analysis ? (
+        {entries.length >= 5 ? (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-12 glass p-6 lg:p-8 rounded-[32px] border border-white/5 relative overflow-hidden group"
+            className="mb-12 glass p-6 lg:p-10 rounded-[40px] border border-white/5 relative overflow-hidden group shadow-2xl"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-beige/10 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-beige/20 transition-all duration-700" />
-            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-              <div className="space-y-4 max-w-xl">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-beige" />
-                  <h3 className="text-white font-serif text-2xl italic">{t.common.analysisTitle}</h3>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 opacity-30 transition-all duration-1000" />
+            
+            {(!aiAnalysis || (hasRequestedAnalysis && canRequestNewAnalysis)) && !isAnalyzing ? (
+              <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-8">
+                <div className="w-16 h-16 rounded-[24px] bg-beige/10 flex items-center justify-center text-beige">
+                  <Sparkles className="w-8 h-8" />
                 </div>
-                <p className="text-sage text-sm leading-relaxed">{t.common.analysisSub}</p>
-                
-                <div className="flex flex-wrap gap-6 pt-2">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest">{t.common.recurringThemes}</span>
-                    <div className="flex flex-wrap gap-2">
-                      {analysis.topThemes.map((theme: string, i: number) => (
-                        <span key={i} className="text-xs text-white bg-white/5 px-3 py-1 rounded-full border border-white/5">
-                          {theme}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest">{t.common.emotionalPatterns}</span>
-                    <div className="flex flex-wrap gap-2">
-                      {analysis.topPatterns.map((pattern: string, i: number) => (
-                        <span key={i} className="text-xs text-beige/80 border border-beige/20 px-3 py-1 rounded-full">
-                          {pattern}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                <div className="space-y-2">
+                  <h3 className="text-white font-serif text-3xl italic tracking-tight">{t.common.momentOfPerspective}</h3>
+                  <p className="text-sage/60 font-cormorant text-lg italic max-w-md">
+                    {aiAnalysis 
+                      ? t.common.updatedReflections
+                      : t.common.enoughReflections
+                    }
+                  </p>
                 </div>
+                <button 
+                  onClick={handleRequestAnalysis}
+                  className="px-8 py-3 rounded-full bg-beige text-forest text-xs font-bold uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-lg"
+                >
+                  {aiAnalysis ? t.common.updatePatterns : t.common.seekPatterns}
+                </button>
               </div>
+            ) : (
+              <div className="relative z-10 grid lg:grid-cols-3 gap-12 items-start">
+                {/* Main Analysis Column */}
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-beige/10 flex items-center justify-center text-beige">
+                        <Sparkles className={`w-5 h-5 ${isAnalyzing ? 'animate-pulse' : ''}`} />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-serif text-2xl italic tracking-tight">{t.common.analysisTitle}</h3>
+                        <p className="text-sage/60 text-[10px] uppercase tracking-[0.2em] font-bold">A thoughtful occasional check-in</p>
+                      </div>
+                    </div>
+                    
+                    {aiAnalysis && !isAnalyzing && canRequestNewAnalysis && (
+                      <button 
+                        onClick={handleRequestAnalysis}
+                        className="text-[10px] flex items-center gap-2 text-beige/50 hover:text-beige transition-colors uppercase tracking-widest font-bold"
+                      >
+                        <History className="w-3 h-3" />
+                        {t.common.updatePatterns}
+                      </button>
+                    )}
+                  </div>
 
-              <div className="flex items-center gap-8 px-6 py-4 bg-forest/40 rounded-2xl border border-white/5">
-                <div className="text-center">
-                  <div className="text-2xl font-serif text-white italic">{analysis.totalEntries}</div>
-                  <div className="text-[10px] font-bold text-sage/50 uppercase tracking-widest">Contemplations</div>
+                  {isAnalyzing ? (
+                    <div className="space-y-4 py-4">
+                       <div className="h-4 bg-white/5 rounded-full w-3/4 animate-pulse" />
+                       <div className="h-4 bg-white/5 rounded-full w-1/2 animate-pulse" />
+                       <div className="grid grid-cols-2 gap-4 pt-4">
+                          <div className="h-20 bg-white/5 rounded-3xl animate-pulse" />
+                          <div className="h-20 bg-white/5 rounded-3xl animate-pulse" />
+                       </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      {aiAnalysis ? (
+                        <>
+                          <div className="space-y-2">
+                             <p className="text-white/80 font-cormorant text-xl italic leading-relaxed max-w-2xl">
+                               &ldquo;{aiAnalysis.summary}&rdquo;
+                             </p>
+                             <p className="text-[10px] text-sage/30 uppercase tracking-widest">
+                               {t.common.capturedOn} {new Date(aiAnalysis.timestamp).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' })}
+                             </p>
+                          </div>
+
+                          <div className="grid sm:grid-cols-2 gap-8">
+                             {aiAnalysis.recurringThemes.length > 0 && (
+                               <div className="space-y-3">
+                                 <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block">{t.common.recurringThemes}</span>
+                                 <div className="flex flex-wrap gap-2">
+                                   {aiAnalysis.recurringThemes.map((theme, i) => (
+                                     <span key={i} className="text-xs text-white bg-forest/40 px-4 py-2 rounded-2xl border border-white/5 font-medium">
+                                       {theme}
+                                     </span>
+                                   ))}
+                                 </div>
+                               </div>
+                             )}
+
+                             {aiAnalysis.perspectiveShifts.length > 0 && (
+                               <div className="space-y-3">
+                                 <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block">{t.common.perspectiveEvolution}</span>
+                                 <div className="space-y-2">
+                                   {aiAnalysis.perspectiveShifts.map((shift, i) => (
+                                     <div key={i} className="flex items-start gap-2 text-white/60 text-xs italic font-cormorant">
+                                        <span className="text-beige/40">→</span>
+                                        {shift}
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             )}
+
+                             {aiAnalysis.recurringQuestions.length > 0 && (
+                               <div className="sm:col-span-2 space-y-4 pt-4 border-t border-white/5">
+                                 <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block">{t.common.recurringInquiries}</span>
+                                 <div className="flex flex-wrap gap-4">
+                                   {aiAnalysis.recurringQuestions.map((q, i) => (
+                                     <div key={i} className="p-4 bg-white/5 rounded-3xl border border-white/5 flex-1 min-w-[200px]">
+                                        <p className="text-beige/80 text-sm font-cormorant italic leading-snug">
+                                          &ldquo;{q}&rdquo;
+                                        </p>
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             )}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sage/40 text-sm font-cormorant italic">Refreshing perspective patterns...</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="w-px h-10 bg-white/10" />
-                <div className="text-center">
-                  <div className="text-2xl font-serif text-white italic">
-                    {analysis.lastReflected ? new Date(analysis.lastReflected).toLocaleDateString(locale, { day: 'numeric', month: 'short' }) : '---'}
-                  </div>
-                  <div className="text-[10px] font-bold text-sage/50 uppercase tracking-widest">Last Journey</div>
+
+                {/* Stats Sidebar */}
+                <div className="lg:border-l lg:border-white/5 lg:pl-12 space-y-8 h-full">
+                   <div className="grid grid-cols-2 lg:grid-cols-1 gap-6">
+                      <div className="space-y-1">
+                        <div className="text-4xl font-serif text-white italic">{stats.total}</div>
+                        <div className="text-[9px] font-bold text-sage/40 uppercase tracking-[0.2em]">Total Contemplations</div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xl font-serif text-white italic">
+                          {stats.last ? new Date(stats.last).toLocaleDateString(locale, { day: 'numeric', month: 'short' }) : '---'}
+                        </div>
+                        <div className="text-[9px] font-bold text-sage/40 uppercase tracking-[0.2em]">Last Journey</div>
+                      </div>
+                   </div>
+
+                   {stats.topThemes.length > 0 && (
+                     <div className="space-y-3 pt-6 border-t border-white/5">
+                        <span className="text-[9px] font-bold text-sage/40 uppercase tracking-[0.2em]">Primary Lenses</span>
+                        <div className="flex flex-wrap gap-2">
+                          {stats.topThemes.map((theme, i) => (
+                            <span key={i} className="text-[10px] text-white/50 bg-white/5 px-2 py-1 rounded border border-white/5 uppercase tracking-tighter">
+                              {theme}
+                            </span>
+                          ))}
+                        </div>
+                     </div>
+                   )}
                 </div>
               </div>
-            </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -328,10 +480,10 @@ export default function Journal({ onLoadContext }: JournalProps) {
                           {t.common.editEntry}
                         </button>
                         <button
-                          onClick={() => onLoadContext(selectedEntry.input)}
+                          onClick={() => onLoadContext(selectedEntry.input, selectedEntry.title)}
                           className="flex items-center gap-2 px-6 py-3 rounded-full bg-beige/10 border border-beige/20 text-beige text-xs font-bold uppercase tracking-widest hover:bg-beige/20 transition-all"
                         >
-                          {t.common.revisitPerspective}
+                          {t.common.startNew}
                           <ChevronRight className="w-4 h-4" />
                         </button>
                       </>
@@ -350,13 +502,49 @@ export default function Journal({ onLoadContext }: JournalProps) {
                         placeholder="Pour your thoughts here..."
                       />
                     ) : (
-                      <p className="serif text-xl lg:text-2xl text-white italic leading-relaxed max-w-2xl">
+                      <p className="serif text-xl lg:text-2xl text-white italic leading-relaxed max-w-2xl whitespace-pre-wrap">
                         &ldquo;{selectedEntry.input}&rdquo;
                       </p>
                     )}
                   </section>
 
-                  {!isEditing && selectedEntry.result && (
+                  {/* Reflection Question & Answer Section */}
+                  {((selectedEntry.result?.reflectionPrompt) || isEditing) && (
+                    <section className="space-y-6 pt-6 border-t border-white/5">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-beige" />
+                        <h4 className="text-[10px] font-bold text-sage uppercase tracking-widest">{t.common.reflectionQuestion}</h4>
+                      </div>
+                      
+                      <div className="space-y-6">
+                        {selectedEntry.result?.reflectionPrompt && (
+                          <div className="p-6 bg-forest/30 rounded-2xl border border-white/5">
+                             <p className="serif text-lg text-beige italic leading-relaxed">
+                               &ldquo;{selectedEntry.result.reflectionPrompt}&rdquo;
+                             </p>
+                          </div>
+                        )}
+                        
+                        <div>
+                           <h5 className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block mb-4">Your Answer</h5>
+                           {isEditing ? (
+                             <textarea 
+                               className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 font-cormorant text-lg text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[120px]"
+                               value={editData.reflectionAnswer}
+                               onChange={(e) => setEditData({ ...editData, reflectionAnswer: e.target.value })}
+                               placeholder={t.common.reflectionAnswerPlaceholder}
+                             />
+                           ) : (
+                             <p className="font-cormorant text-lg lg:text-xl text-white/80 italic leading-relaxed whitespace-pre-wrap">
+                               {selectedEntry.reflectionAnswer || "No response recorded."}
+                             </p>
+                           )}
+                        </div>
+                      </div>
+                    </section>
+                  )}
+
+                  {!isEditing && selectedEntry.result && selectedEntry.result.reflectionSummary && (
                     <motion.section 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -383,7 +571,7 @@ export default function Journal({ onLoadContext }: JournalProps) {
                                    {selectedEntry.result.emotionalInsight}
                                  </p>
                                  <div className="flex flex-wrap gap-2">
-                                    {selectedEntry.result.emotionalPatterns.map((pattern, i) => (
+                                    {selectedEntry.result.emotionalPatterns?.map((pattern, i) => (
                                       <span key={i} className="text-[9px] font-bold text-stone-400 bg-white/5 px-2 py-1 rounded border border-white/5 uppercase tracking-tighter">
                                         {pattern}
                                       </span>
@@ -403,7 +591,7 @@ export default function Journal({ onLoadContext }: JournalProps) {
                             <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
                               <h5 className="text-[10px] font-bold text-sage uppercase tracking-widest mb-3">Within Your Control</h5>
                               <ul className="space-y-3">
-                                {selectedEntry.result.controlMapping.within.map((item, i) => (
+                                {selectedEntry.result.controlMapping?.within?.map((item, i) => (
                                   <li key={i} className="text-white/60 text-sm flex gap-3">
                                     <span className="text-beige/30 font-bold">•</span>
                                     <span className="font-cormorant italic text-base">{item}</span>
@@ -414,7 +602,7 @@ export default function Journal({ onLoadContext }: JournalProps) {
                             <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
                               <h5 className="text-[10px] font-bold text-sage uppercase tracking-widest mb-3">Next Conscious Steps</h5>
                               <ul className="space-y-3">
-                                {selectedEntry.result.nextSteps.map((item, i) => (
+                                {selectedEntry.result.nextSteps?.map((item, i) => (
                                   <li key={i} className="text-white/60 text-sm flex gap-3">
                                     <span className="text-beige/30 font-bold">{i+1}.</span>
                                     <span className="font-cormorant italic text-base">{item}</span>

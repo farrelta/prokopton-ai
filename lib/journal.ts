@@ -5,6 +5,7 @@ export interface JournalEntry {
   timestamp: string;
   title?: string;
   input: string;
+  reflectionAnswer?: string;
   mode?: PhilosophyMode;
   result?: ReflectionResponse;
 }
@@ -37,6 +38,63 @@ export const deleteFromJournal = (id: string) => {
   const journal = getJournal();
   localStorage.setItem('prokopton_journal', JSON.stringify(journal.filter(e => e.id !== id)));
 };
+
+export interface JournalAnalysis {
+  summary: string;
+  recurringThemes: string[];
+  perspectiveShifts: string[];
+  recurringQuestions: string[];
+  lastReflected: string;
+  timestamp: string;
+  entryCountAtAnalysis: number;
+}
+
+export const getStoredAnalysis = (): JournalAnalysis | null => {
+  if (typeof window === 'undefined') return null;
+  const saved = localStorage.getItem('prokopton_analysis');
+  return saved ? JSON.parse(saved) : null;
+};
+
+export const saveAnalysis = (analysis: JournalAnalysis) => {
+  localStorage.setItem('prokopton_analysis', JSON.stringify(analysis));
+};
+
+export async function getAIJournalAnalysis(journal: JournalEntry[], language: string = 'en'): Promise<JournalAnalysis | null> {
+  if (journal.length < 5) return null;
+
+  // Prepare a condensed history for the AI
+  const history = journal.slice(0, 10).map(e => ({
+    date: e.timestamp,
+    title: e.title,
+    theme: e.result?.dominantTheme,
+    patterns: e.result?.emotionalPatterns,
+    summary: e.result?.reflectionSummary
+  }));
+
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history, language })
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    
+    const analysis: JournalAnalysis = {
+      ...data,
+      timestamp: new Date().toISOString(),
+      entryCountAtAnalysis: journal.length,
+      lastReflected: journal[0]?.timestamp
+    };
+
+    saveAnalysis(analysis);
+    return analysis;
+  } catch (error) {
+    console.error('Failed to fetch AI analysis:', error);
+    return null;
+  }
+}
 
 export const analyzeJournalHistory = (journal: JournalEntry[]) => {
   if (journal.length < 3) return null;
