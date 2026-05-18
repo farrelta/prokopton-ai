@@ -1,0 +1,263 @@
+
+export type Language = 'en' | 'id';
+
+export const translations = {
+  en: {
+    nav: {
+      daily: 'Daily Reflections',
+      library: 'Wisdom Library',
+      home: 'Home',
+      journal: 'Journals',
+    },
+    hero: {
+      clarity: 'Find clarity in the',
+      unfolding: 'unfolding moment.',
+      greetings: {
+        morning: 'Good morning',
+        afternoon: 'Good afternoon',
+        evening: 'Good evening',
+        night: 'Good night',
+      },
+      greetingSuffix: '. Tell me what is filling your mind right now. Prokopton helps you reinterpret stress through timeless wisdom.',
+    },
+    footer: {
+      copyright: '© 2026 Prokopton Reflection Tool • JuaraVibeCoding Entry',
+      privacy: 'Privacy',
+      terms: 'Terms',
+      cloud: 'Cloud Run Powered',
+    },
+    common: {
+      aiActive: 'AI Active',
+      logReflection: 'Log Reflection',
+      shareWisdom: 'Share Wisdom',
+      logged: 'Logged for Today',
+      dailyContemplation: 'Daily Contemplation',
+      viewAnotherLens: 'View Through Another Lens',
+      reflectionPrompt: 'Reflection Prompt',
+      startNew: 'New Reflection',
+      continue: 'Explore Further',
+      dailyTheme: 'Daily Contemplation',
+      todaysPractice: "Today's Practice",
+      morningIntention: 'Morning Intention',
+      middayPause: 'Midday Pause',
+      eveningReview: 'Evening Review',
+      journey: 'Reflection Journey',
+      consistency: 'Consistency',
+      saveToJournal: 'Save to Journal',
+      journalSaved: 'Saved',
+      journalEmpty: 'Your journals are empty. Begin documenting your path.',
+      viewJournal: 'View Journals',
+      loadContext: 'Load into Reflection',
+      journalTitle: 'The Journals',
+      journalSub: 'A record of your evolution and inner dialogue.',
+      deleteEntry: 'Delete Entry',
+      editEntry: 'Edit Entry',
+      addEntry: 'New Entry',
+      saveEntry: 'Save Entry',
+      cancel: 'Cancel',
+      backToReflection: 'Return to Reflection',
+      entryTitle: 'Title',
+      entryContent: 'Contemplation',
+      emotionalPatterns: 'Emotional Patterns',
+      growthSummary: 'Growth Summary',
+      dominantTheme: 'Dominant Theme',
+      revisitPerspective: 'Revisit Perspective',
+      recurringThemes: 'Recurring Themes',
+      insightSummary: 'Insight Summary',
+      timeline: 'Reflection Timeline',
+      analysisTitle: 'Pattern Recognition',
+      analysisSub: 'Subtle observations of your internal dialogue.',
+      confirmDelete: 'Are you sure you want to delete this entry?',
+      analysisPending: 'Pattern recognition requires at least three AI-guided reflections to begin observing your internal dialogue. Reflect more to unlock insights.',
+    },
+    library: {
+      archive: 'Archive of Perspective',
+      title: 'Wisdom Library',
+      description: 'A curated collection of timeless insights, shuffled daily to offer new perspectives.',
+    },
+    reflection: {
+      modeHeader: 'How shall we reflect today?',
+      modeSubheader: 'Choose a lens that resonates with your current state of mind.',
+      beginButton: 'Begin Reflection',
+      inputHeader: 'What is weighing on your mind?',
+      inputSubheader: 'Describe your struggle, your overthinking, or a situation that feels heavy.',
+      inputPlaceholder: "I've been feeling overwhelmed by...",
+      changeLens: 'Change Lens',
+      getPerspective: 'Get Perspective',
+      loadingTitle: 'Finding a different light...',
+      loadingSub: 'Gathering perspective from',
+      characters: 'characters',
+      modes: {
+        automatic: "AI selects best lens",
+        stoicism: "Focus on control",
+        buddhism: "Mindful detachment",
+        taoism: "Natural harmony",
+        islamic_wisdom: "Faith & Patience",
+        existentialism: "Creating meaning",
+        minimalism: "Intentional focus",
+        modern_psychology: "Reflective logic",
+      }
+    },
+    themes: [
+      {
+        title: "The Space Between",
+        quote: "Between stimulus and response there is a space. In that space is our power to choose our response. In our response lies our growth and our freedom.",
+        author: "Viktor Frankl",
+        contemplations: [
+          "Identify one recurring 'stimulus' in your day that usually triggers an impulsive reaction.",
+          "Practice pausing for just three breaths before responding to the next notification or request.",
+          "Observe the physical sensation of that 'space'—does it feel like stillness or tension?"
+        ]
+      },
+      {
+        title: "Amorfati (Love of Fate)",
+        quote: "My formula for greatness in a human being is amor fati: that one wants nothing to be different, not forward, not backward, not in all eternity.",
+        author: "Friedrich Nietzsche",
+        contemplations: [
+          "Accept one minor inconvenience today without complaining, even to yourself.",
+          "Consider how a past failure actually paved the way for a current success.",
+          "Say 'it is what it is' to a situation you cannot change, and mean it."
+        ]
+      },
+      {
+        title: "The Beginners Mind",
+        quote: "In the beginner's mind there are many possibilities, but in the expert's there are few.",
+        author: "Shunryu Suzuki",
+        contemplations: [
+          "Approach a routine task today as if you have never done it before.",
+          "Listen to someone explain something you already 'know', and look for one new detail.",
+          "Admit 'I don't know' in a conversation where you feel pressured to have an answer."
+        ]
+      }
+    ]
+  },
+  id: {
+    nav: {
+      daily: 'Refleksi Harian',
+      library: 'Perpustakaan Hikmah',
+      home: 'Beranda',
+      journal: 'Jurnal',
+    },
+    hero: {
+      clarity: 'Temukan kejernihan dalam',
+      unfolding: 'setiap momen.',
+      greetings: {
+        morning: 'Selamat pagi',
+        afternoon: 'Selamat siang',
+        evening: 'Selamat sore',
+        night: 'Selamat malam',
+      },
+      greetingSuffix: '. Ceritakan apa yang sedang memenuhi pikiranmu saat ini. Prokopton membantu Anda menafsirkan kembali stres melalui kebijaksanaan abadi.',
+    },
+    footer: {
+      copyright: '© 2026 Prokopton Reflection Tool • JuaraVibeCoding Entry',
+      privacy: 'Privasi',
+      terms: 'Syarat',
+      cloud: 'Didukung Cloud Run',
+    },
+    common: {
+      aiActive: 'AI Aktif',
+      logReflection: 'Catat Refleksi',
+      shareWisdom: 'Bagikan Hikmah',
+      logged: 'Sudah Dicatat Hari Ini',
+      dailyContemplation: 'Kontemplasi Harian',
+      viewAnotherLens: 'Lihat Dari Lensa Lain',
+      reflectionPrompt: 'Pertanyaan Refleksi',
+      startNew: 'Refleksi Baru',
+      continue: 'Jelajahi Lebih Lanjut',
+      dailyTheme: 'Kontemplasi Harian',
+      todaysPractice: 'Latihan Hari Ini',
+      morningIntention: 'Niat Pagi',
+      middayPause: 'Jeda Siang',
+      eveningReview: 'Tinjauan Malam',
+      journey: 'Perjalanan Refleksi',
+      consistency: 'Konsistensi',
+      saveToJournal: 'Simpan ke Jurnal',
+      journalSaved: 'Tersimpan',
+      journalEmpty: 'Jurnal Anda kosong. Mulailah mencatat perjalanan Anda.',
+      viewJournal: 'Lihat Jurnal',
+      loadContext: 'Muat ke Refleksi',
+      journalTitle: 'Jurnal Pribadi',
+      journalSub: 'Catatan pertumbuhan dan dialog batin Anda.',
+      deleteEntry: 'Hapus Catatan',
+      editEntry: 'Ubah Catatan',
+      addEntry: 'Catatan Baru',
+      saveEntry: 'Simpan Catatan',
+      cancel: 'Batal',
+      backToReflection: 'Kembali ke Refleksi',
+      entryTitle: 'Judul',
+      entryContent: 'Kontemplasi',
+      emotionalPatterns: 'Pola Emosional',
+      growthSummary: 'Ringkasan Pertumbuhan',
+      dominantTheme: 'Tema Dominan',
+      revisitPerspective: 'Tinjau Perspektif',
+      recurringThemes: 'Tema Berulang',
+      insightSummary: 'Ringkasan Wawasan',
+      timeline: 'Timeline Refleksi',
+      analysisTitle: 'Pengenalan Pola',
+      analysisSub: 'Pengamatan halus terhadap dialog batin Anda.',
+      confirmDelete: 'Apakah Anda yakin ingin menghapus catatan ini?',
+      analysisPending: 'Pengenalan pola memerlukan setidaknya tiga refleksi terbimbing AI untuk mulai mengamati dialog batin Anda. Lakukan lebih banyak refleksi untuk membuka wawasan.',
+    },
+    library: {
+      archive: 'Arsip Perspektif',
+      title: 'Perpustakaan Hikmah',
+      description: 'Kumpulan wawasan abadi yang dikuratori, diacak setiap hari untuk menawarkan perspektif baru.',
+    },
+    reflection: {
+      modeHeader: 'Bagaimana kita akan berefleksi hari ini?',
+      modeSubheader: 'Pilih lensa yang selaras dengan keadaan pikiran Anda saat ini.',
+      beginButton: 'Mulai Refleksi',
+      inputHeader: 'Apa yang sedang membebani pikiran Anda?',
+      inputSubheader: 'Jelaskan pergumulan Anda, pemikiran berlebih, atau situasi yang terasa berat.',
+      inputPlaceholder: "Saya merasa kewalahan oleh...",
+      changeLens: 'Ganti Lensa',
+      getPerspective: 'Dapatkan Perspektif',
+      loadingTitle: 'Mencari cahaya yang berbeda...',
+      loadingSub: 'Mengumpulkan perspektif dari',
+      characters: 'karakter',
+      modes: {
+        automatic: "AI memilih lensa terbaik",
+        stoicism: "Fokus pada kendali",
+        buddhism: "Pelepasan penuh kesadaran",
+        taoism: "Harmoni alami",
+        islamic_wisdom: "Iman & Kesabaran",
+        existentialism: "Menciptakan makna",
+        minimalism: "Fokus yang disengaja",
+        modern_psychology: "Logika reflektif",
+      }
+    },
+    themes: [
+      {
+        title: "Ruang di Antara",
+        quote: "Antara stimulus dan respon ada sebuah ruang. Di ruang itu ada kekuatan kita untuk memilih respon kita. Dalam respon kita terletak pertumbuhan dan kebebasan kita.",
+        author: "Viktor Frankl",
+        contemplations: [
+          "Identifikasi satu 'stimulus' yang berulang dalam hari Anda yang biasanya memicu reaksi impulsif.",
+          "Berlatihlah berhenti sejenak selama tiga tarikan napas sebelum menanggapi notifikasi atau permintaan berikutnya.",
+          "Amati sensasi fisik dari 'ruang' itu—apakah terasa seperti ketenangan atau ketegangan?"
+        ]
+      },
+      {
+        title: "Amor Fati (Cintai Takdir)",
+        quote: "Formula saya untuk kebesaran manusia adalah amor fati: bahwa seseorang tidak menginginkan apa pun berbeda, tidak ke depan, tidak ke belakang, tidak dalam keabadian.",
+        author: "Friedrich Nietzsche",
+        contemplations: [
+          "Terimalah satu ketidaknyamanan kecil hari ini tanpa mengeluh, bahkan kepada diri sendiri.",
+          "Pertimbangkan bagaimana kegagalan di masa lalu sebenarnya membuka jalan bagi kesuksesan saat ini.",
+          "Katakan 'memang begitu adanya' pada situasi yang tidak bisa Anda ubah, dan resapi maknanya."
+        ]
+      },
+      {
+        title: "Pikiran Pemula",
+        quote: "Dalam pikiran pemula ada banyak kemungkinan, tetapi dalam pikiran ahli hanya ada sedikit.",
+        author: "Shunryu Suzuki",
+        contemplations: [
+          "Dekati tugas rutin hari ini seolah-olah Anda belum pernah melakukannya sebelumnya.",
+          "Dengarkan seseorang menjelaskan sesuatu yang sudah Anda 'ketahui', dan cari satu detail baru.",
+          "Akui 'saya tidak tahu' dalam percakapan di mana Anda merasa tertekan untuk memiliki jawaban."
+        ]
+      }
+    ]
+  }
+};
