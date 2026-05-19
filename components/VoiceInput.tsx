@@ -72,6 +72,7 @@ export default function VoiceInput({ onTranscript, className = "" }: VoiceInputP
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={toggleListening}
+        title={isListening ? t.common.voice?.stop : t.common.voice?.speakThoughts}
         className={`relative p-4 rounded-full transition-all duration-500 ${
           isListening 
             ? 'bg-rose-500/20 text-rose-500 ring-4 ring-rose-500/10' 

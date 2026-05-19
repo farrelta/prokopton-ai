@@ -23,9 +23,10 @@ import { useLanguage } from '@/lib/LanguageContext';
 
 interface WisdomLibraryProps {
   onReflect?: (text: string) => void;
+  onAddToJournal?: (text: string, title: string) => void;
 }
 
-export default function WisdomLibrary({ onReflect }: WisdomLibraryProps) {
+export default function WisdomLibrary({ onReflect, onAddToJournal }: WisdomLibraryProps) {
   const { t } = useLanguage();
   const [today, setToday] = useState(() => new Date());
   
@@ -93,6 +94,13 @@ export default function WisdomLibrary({ onReflect }: WisdomLibraryProps) {
     }
   };
 
+  const handleAddToJournalClick = (e: React.MouseEvent, content: string, title?: string) => {
+    e.stopPropagation();
+    if (onAddToJournal) {
+      onAddToJournal(content, title || "Contemplation");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <header className="mb-12 text-center relative flex flex-col items-center">
@@ -118,7 +126,7 @@ export default function WisdomLibrary({ onReflect }: WisdomLibraryProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="group relative glass p-8 rounded-[40px] border border-white/5 hover:border-beige/30 transition-all cursor-pointer flex flex-col justify-between min-h-[400px] overflow-hidden"
+            className="group relative glass p-8 rounded-[40px] border border-white/5 hover:border-beige/30 transition-all cursor-pointer flex flex-col justify-between min-h-[420px] overflow-hidden"
           >
             <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-40 transition-opacity">
               <ExternalLink className="w-4 h-4 text-beige" />
@@ -134,13 +142,20 @@ export default function WisdomLibrary({ onReflect }: WisdomLibraryProps) {
               <h3 className="serif text-xl lg:text-2xl text-white mb-6 transition-colors group-hover:text-beige leading-tight">
                 &ldquo;{card.content}&rdquo;
               </h3>
-              <div className="relative mt-8 ">
+              <div className="relative mt-8 flex flex-wrap gap-3">
                 <button 
                   onClick={(e) => handleReflectClick(e, card.content)}
                   className="flex items-center gap-2 px-6 py-3 rounded-full bg-beige text-forest font-bold text-[10px] uppercase tracking-[0.2em] shadow-2xl opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:translate-y-6 lg:group-hover:-translate-y-4 translate-y-0 transition-all duration-500 hover:scale-105 active:scale-95"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   Reflect AI
+                </button>
+                <button 
+                  onClick={(e) => handleAddToJournalClick(e, card.content, card.philosophy)}
+                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 text-white font-bold text-[10px] uppercase tracking-[0.2em] shadow-2xl opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:translate-y-6 lg:group-hover:-translate-y-4 translate-y-0 transition-all duration-500 hover:scale-105 active:scale-95 border border-white/5 hover:bg-white/20"
+                >
+                  <Book className="w-3.5 h-3.5" />
+                  {t.library?.addToJournal || "Add to Journal"}
                 </button>
               </div>
             </div>

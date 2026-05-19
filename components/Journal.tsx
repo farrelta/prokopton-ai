@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Book, Trash2, Calendar, ChevronRight, History, Plus, Edit3, Save, X, Sparkles, ShieldCheck, Mic } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -7,9 +7,12 @@ import VoiceInput from './VoiceInput';
 
 interface JournalProps {
   onLoadContext: (text: string, title?: string) => void;
+  initialText?: string;
+  initialTitle?: string;
+  onClearInitial?: () => void;
 }
 
-export default function Journal({ onLoadContext }: JournalProps) {
+export default function Journal({ onLoadContext, initialText, initialTitle, onClearInitial }: JournalProps) {
   const { t, language } = useLanguage();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
@@ -23,6 +26,7 @@ export default function Journal({ onLoadContext }: JournalProps) {
   const [aiAnalysis, setAiAnalysis] = useState<JournalAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasRequestedAnalysis, setHasRequestedAnalysis] = useState(false);
+  const processedInitialRef = useRef<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,6 +40,28 @@ export default function Journal({ onLoadContext }: JournalProps) {
     };
     loadData();
   }, []);
+
+  // Handle initial text from other pages (like Wisdom Library)
+  useEffect(() => {
+    if (initialText && processedInitialRef.current !== initialText) {
+      processedInitialRef.current = initialText;
+      const createAndEdit = async () => {
+        const title = initialTitle || 'New contemplation';
+        const newEntry = {
+          title,
+          input: initialText,
+        };
+        const saved = await saveToJournal(newEntry);
+        setEntries(prev => [saved, ...prev]);
+        setSelectedEntry(saved);
+        setIsEditing(true);
+        setEditData({ title, content: initialText, reflectionAnswer: '' });
+        
+        if (onClearInitial) onClearInitial();
+      };
+      createAndEdit();
+    }
+  }, [initialText, initialTitle, onClearInitial]);
 
   const handleRequestAnalysis = () => {
     setHasRequestedAnalysis(true);

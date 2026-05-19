@@ -93,6 +93,7 @@ export const translations = {
       archive: 'Archive of Perspective',
       title: 'Wisdom Library',
       description: 'A curated collection of timeless insights, shuffled daily to offer new perspectives.',
+      addToJournal: 'Add to Journal',
     },
     reflection: {
       modeHeader: 'How shall we reflect today?',
@@ -251,6 +252,7 @@ export const translations = {
       archive: 'Arsip Perspektif',
       title: 'Perpustakaan Hikmah',
       description: 'Kumpulan wawasan abadi yang dikuratori, diacak setiap hari untuk menawarkan perspektif baru.',
+      addToJournal: 'Simpan ke Jurnal',
     },
     reflection: {
       modeHeader: 'Bagaimana kita akan berefleksi hari ini?',

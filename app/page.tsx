@@ -70,12 +70,19 @@ export default function Home() {
   };
 
   const [journalTitle, setJournalTitle] = useState<string | null>(null);
+  const [journalInitialText, setJournalInitialText] = useState<string | null>(null);
 
   const handleLoadContext = (text: string, title?: string) => {
     setJournalContext(text);
     setJournalTitle(title || null);
     setActiveTab('home');
     scrollToReflect(false);
+  };
+
+  const handleAddToJournal = (text: string, title?: string) => {
+    setJournalInitialText(text);
+    setJournalTitle(title || null);
+    setActiveTab('journal');
   };
 
   const handleGoHome = () => {
@@ -261,7 +268,10 @@ export default function Home() {
               transition={{ duration: 0.3 }}
               className="pt-12"
             >
-              <WisdomLibrary onReflect={handleLoadContext} />
+              <WisdomLibrary 
+                onReflect={handleLoadContext} 
+                onAddToJournal={handleAddToJournal}
+              />
             </motion.div>
           )}
 
@@ -274,7 +284,15 @@ export default function Home() {
               transition={{ duration: 0.3 }}
               className="pt-12"
             >
-              <Journal onLoadContext={handleLoadContext} />
+              <Journal 
+                onLoadContext={handleLoadContext} 
+                initialText={journalInitialText || undefined}
+                initialTitle={journalTitle || undefined}
+                onClearInitial={() => {
+                  setJournalInitialText(null);
+                  setJournalTitle(null);
+                }}
+              />
             </motion.div>
           )}
         </AnimatePresence>
