@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sun, Wind, Moon, Coffee, Sparkles, CheckCircle2, Calendar } from 'lucide-react';
+import { Sun, Wind, Moon, Coffee, Sparkles, CheckCircle2, Calendar, Mic } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
+import VoiceInput from './VoiceInput';
 
 interface DailyReflectionsProps {
   onReflect?: (text: string, title?: string) => void;
@@ -196,13 +197,18 @@ export default function DailyReflections({ onReflect }: DailyReflectionsProps) {
             </div>
 
             <div className="mt-16 relative z-10">
-              <div className="bg-forest/50 p-6 rounded-3xl border border-white/5 shadow-inner">
+              <div className="bg-forest/50 p-6 rounded-3xl border border-white/5 shadow-inner relative group">
                 <textarea
                   value={reflectionInput}
                   onChange={(e) => setReflectionInput(e.target.value)}
                   placeholder="Write your reflection based on today's wisdom..."
-                  className="w-full bg-transparent text-sage placeholder-sage/30 resize-none outline-none min-h-[120px] mb-4"
+                  className="w-full bg-transparent text-sage placeholder-sage/30 resize-none outline-none min-h-[120px] mb-4 pr-16"
                 />
+                <div className="absolute top-6 right-6">
+                  <VoiceInput 
+                    onTranscript={(text) => setReflectionInput(prev => prev + (prev.trim() ? " " : "") + text)}
+                  />
+                </div>
                 <div className="flex justify-between items-center border-t border-white/5 pt-4">
                   <AnimatePresence>
                     {showSuccess ? (

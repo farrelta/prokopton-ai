@@ -1,6 +1,6 @@
 {
   "name": "Prokopton",
   "description": "An AI-powered philosophical reflection companion for emotional clarity and stress reduction.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

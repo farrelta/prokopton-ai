@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Book, Trash2, Calendar, ChevronRight, History, Plus, Edit3, Save, X, Sparkles, ShieldCheck } from 'lucide-react';
+import { Book, Trash2, Calendar, ChevronRight, History, Plus, Edit3, Save, X, Sparkles, ShieldCheck, Mic } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getJournal, JournalEntry, deleteFromJournal, saveToJournal, updateJournalEntry, analyzeJournalHistory, getAIJournalAnalysis, JournalAnalysis, getStoredAnalysis } from '@/lib/journal';
+import VoiceInput from './VoiceInput';
 
 interface JournalProps {
   onLoadContext: (text: string, title?: string) => void;
@@ -503,12 +504,19 @@ export default function Journal({ onLoadContext }: JournalProps) {
                   <section className="space-y-4">
                     <h4 className="text-[10px] font-bold text-sage uppercase tracking-widest">{t.common.entryContent}</h4>
                     {isEditing ? (
-                      <textarea 
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 serif text-xl text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[200px]"
-                        value={editData.content}
-                        onChange={(e) => setEditData({ ...editData, content: e.target.value })}
-                        placeholder="Pour your thoughts here..."
-                      />
+                      <div className="relative group">
+                        <textarea 
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 serif text-xl text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[200px] pr-16"
+                          value={editData.content}
+                          onChange={(e) => setEditData({ ...editData, content: e.target.value })}
+                          placeholder="Pour your thoughts here..."
+                        />
+                        <div className="absolute top-4 right-4">
+                          <VoiceInput 
+                            onTranscript={(text) => setEditData(prev => ({ ...prev, content: prev.content + (prev.content.trim() ? " " : "") + text }))}
+                          />
+                        </div>
+                      </div>
                     ) : (
                       <p className="serif text-xl lg:text-2xl text-white italic leading-relaxed max-w-2xl whitespace-pre-wrap">
                         &ldquo;{selectedEntry.input}&rdquo;
@@ -536,12 +544,19 @@ export default function Journal({ onLoadContext }: JournalProps) {
                         <div>
                            <h5 className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block mb-4">Your Answer</h5>
                            {isEditing ? (
-                             <textarea 
-                               className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 font-cormorant text-lg text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[120px]"
-                               value={editData.reflectionAnswer}
-                               onChange={(e) => setEditData({ ...editData, reflectionAnswer: e.target.value })}
-                               placeholder={t.common.reflectionAnswerPlaceholder}
-                             />
+                             <div className="relative group">
+                               <textarea 
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 font-cormorant text-lg text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[120px] pr-16"
+                                 value={editData.reflectionAnswer}
+                                 onChange={(e) => setEditData({ ...editData, reflectionAnswer: e.target.value })}
+                                 placeholder={t.common.reflectionAnswerPlaceholder}
+                               />
+                               <div className="absolute top-4 right-4">
+                                 <VoiceInput 
+                                   onTranscript={(text) => setEditData(prev => ({ ...prev, reflectionAnswer: prev.reflectionAnswer + (prev.reflectionAnswer.trim() ? " " : "") + text }))}
+                                 />
+                               </div>
+                             </div>
                            ) : (
                              <p className="font-cormorant text-lg lg:text-xl text-white/80 italic leading-relaxed whitespace-pre-wrap">
                                {selectedEntry.reflectionAnswer || "No response recorded."}

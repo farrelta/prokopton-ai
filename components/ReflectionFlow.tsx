@@ -1,10 +1,11 @@
 'use client';
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Shield, Flower2, Heart, Trees, Cloud, Brain, ArrowRight, Loader2, Sparkles, History } from 'lucide-react';
+import { Shield, Flower2, Heart, Trees, Cloud, Brain, ArrowRight, Loader2, Sparkles, History, Mic } from 'lucide-react';
 import { PhilosophyMode, getReflection, ReflectionResponse } from '@/lib/gemini';
 import ChoiceButton from './ChoiceButton';
 import ResultCard from './ResultCard';
+import VoiceInput from './VoiceInput';
 
 import { useLanguage } from '@/lib/LanguageContext';
 import { useEffect, useState as reactState } from 'react';
@@ -222,8 +223,13 @@ export default function ReflectionFlow({ initialInput, initialTitle, onClearedCo
                 placeholder={t.reflection.inputPlaceholder}
                 className="w-full min-h-[220px] p-8 rounded-[40px] bg-white/5 border border-white/10 focus:border-beige focus:ring-0 transition-all text-beige text-lg font-cormorant resize-none glass shadow-inner placeholder:text-white/20"
               />
-              <div className="absolute top-4 right-8 text-[10px] uppercase tracking-widest text-white/20 font-bold">
-                {input.length} {t.reflection.characters}
+              <div className="absolute top-4 right-8 flex items-center gap-4">
+                <VoiceInput 
+                  onTranscript={(text) => setInput(prev => prev + (prev.trim() ? " " : "") + text)}
+                />
+                <div className="text-[10px] uppercase tracking-widest text-white/20 font-bold">
+                  {input.length} {t.reflection.characters}
+                </div>
               </div>
             </div>
 

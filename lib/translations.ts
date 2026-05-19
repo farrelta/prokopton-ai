@@ -80,6 +80,14 @@ export const translations = {
       capturedOn: 'Captured on',
       encryptedPrivate: 'Encrypted & Private',
       privacyStatement: 'Your thoughts are yours. Reflections are encrypted locally.',
+      voice: {
+        holdToReflect: 'Hold to Reflect',
+        speakThoughts: 'Speak your thoughts',
+        voiceReflection: 'Voice Reflection',
+        listening: 'Listening...',
+        stop: 'Stop & Finish',
+        notSupported: 'Voice input not supported in this browser.',
+      },
     },
     library: {
       archive: 'Archive of Perspective',
@@ -230,6 +238,14 @@ export const translations = {
       capturedOn: 'Diambil pada',
       encryptedPrivate: 'Terenkripsi & Pribadi',
       privacyStatement: 'Pikiran Anda adalah milik Anda. Refleksi dienkripsi secara lokal.',
+      voice: {
+        holdToReflect: 'Tahan untuk Berefleksi',
+        speakThoughts: 'Bicarakan pemikiranmu',
+        voiceReflection: 'Refleksi Suara',
+        listening: 'Mendengarkan...',
+        stop: 'Berhenti & Selesai',
+        notSupported: 'Masukan suara tidak didukung di browser ini.',
+      },
     },
     library: {
       archive: 'Arsip Perspektif',
