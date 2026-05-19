@@ -1,10 +1,11 @@
 'use client';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Quote, CheckCircle2, ChevronLeft, Bookmark, BookmarkCheck, ChevronDown } from 'lucide-react';
+import { Sparkles, Quote, CheckCircle2, ChevronLeft, Bookmark, BookmarkCheck, ChevronDown, Mic } from 'lucide-react';
 import { ReflectionResponse, PhilosophyMode } from '@/lib/gemini';
 import { useLanguage } from '@/lib/LanguageContext';
 import { saveToJournal, getJournal } from '@/lib/journal';
 import { useState, useEffect, useRef } from 'react';
+import VoiceInput from './VoiceInput';
 
 interface ResultCardProps {
   input: string;
@@ -240,8 +241,13 @@ export default function ResultCard({ input, mode, result, forceTitle, onBack, on
               value={reflectionAnswer}
               onChange={(e) => setReflectionAnswer(e.target.value)}
               placeholder={t.common.reflectionAnswerPlaceholder}
-              className="w-full min-h-[120px] p-6 rounded-2xl bg-white/5 border border-white/10 focus:border-beige/30 focus:ring-0 transition-all text-beige text-lg font-cormorant resize-none"
+              className="w-full min-h-[120px] p-6 pb-16 rounded-2xl bg-white/5 border border-white/10 focus:border-beige/30 focus:ring-0 transition-all text-beige text-lg font-cormorant resize-none pr-16"
             />
+            <div className="absolute bottom-4 right-4">
+              <VoiceInput 
+                onTranscript={(text) => setReflectionAnswer(prev => prev + (prev.trim() ? " " : "") + text)}
+              />
+            </div>
           </div>
         </div>
 

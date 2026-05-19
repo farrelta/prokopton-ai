@@ -221,15 +221,15 @@ export default function ReflectionFlow({ initialInput, initialTitle, onClearedCo
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t.reflection.inputPlaceholder}
-                className="w-full min-h-[220px] p-8 rounded-[40px] bg-white/5 border border-white/10 focus:border-beige focus:ring-0 transition-all text-beige text-lg font-cormorant resize-none glass shadow-inner placeholder:text-white/20"
+                className="w-full min-h-[220px] p-8 pb-16 rounded-[40px] bg-white/5 border border-white/10 focus:border-beige focus:ring-0 transition-all text-beige text-lg font-cormorant resize-none glass shadow-inner placeholder:text-white/20"
               />
-              <div className="absolute top-4 right-8 flex items-center gap-4">
+              <div className="absolute top-4 right-8 text-[10px] uppercase tracking-widest text-white/20 font-bold">
+                {input.length} {t.reflection.characters}
+              </div>
+              <div className="absolute bottom-6 right-8">
                 <VoiceInput 
                   onTranscript={(text) => setInput(prev => prev + (prev.trim() ? " " : "") + text)}
                 />
-                <div className="text-[10px] uppercase tracking-widest text-white/20 font-bold">
-                  {input.length} {t.reflection.characters}
-                </div>
               </div>
             </div>
 

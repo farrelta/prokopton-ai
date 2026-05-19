@@ -279,7 +279,7 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                           </div>
 
                           <div className="grid sm:grid-cols-2 gap-8">
-                             {aiAnalysis.recurringThemes.length > 0 && (
+                             {aiAnalysis.recurringThemes?.length > 0 && (
                                <div className="space-y-3">
                                  <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block">{t.common.recurringThemes}</span>
                                  <div className="flex flex-wrap gap-2">
@@ -292,13 +292,13 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                                </div>
                              )}
 
-                             {aiAnalysis.perspectiveShifts.length > 0 && (
-                               <div className="space-y-3">
-                                 <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block">{t.common.perspectiveEvolution}</span>
-                                 <div className="space-y-2">
+                             {aiAnalysis.perspectiveShifts?.length > 0 && (
+                               <div className="space-y-4">
+                                 <span className="text-[11px] font-bold text-sage/40 uppercase tracking-[0.2em] block">{t.common.perspectiveEvolution}</span>
+                                 <div className="space-y-4">
                                    {aiAnalysis.perspectiveShifts.map((shift, i) => (
-                                     <div key={i} className="flex items-start gap-2 text-white/60 text-xs italic font-cormorant">
-                                        <span className="text-beige/40">→</span>
+                                     <div key={i} className="flex items-start gap-3 text-white/80 text-lg italic font-cormorant leading-relaxed">
+                                        <span className="text-beige/40 shrink-0 mt-1">→</span>
                                         {shift}
                                      </div>
                                    ))}
@@ -306,7 +306,7 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                                </div>
                              )}
 
-                             {aiAnalysis.recurringQuestions.length > 0 && (
+                             {aiAnalysis.recurringQuestions?.length > 0 && (
                                <div className="sm:col-span-2 space-y-4 pt-4 border-t border-white/5">
                                  <span className="text-[10px] font-bold text-sage/40 uppercase tracking-widest block">{t.common.recurringInquiries}</span>
                                  <div className="flex flex-wrap gap-4">
@@ -344,7 +344,7 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                       </div>
                    </div>
 
-                   {stats.topThemes.length > 0 && (
+                   {stats.topThemes?.length > 0 && (
                      <div className="space-y-3 pt-6 border-t border-white/5">
                         <span className="text-[9px] font-bold text-sage/40 uppercase tracking-[0.2em]">Primary Lenses</span>
                         <div className="flex flex-wrap gap-2">
@@ -557,12 +557,12 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                     {isEditing ? (
                       <div className="relative group">
                         <textarea 
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 serif text-xl text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[200px] pr-16"
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 pb-16 serif text-xl text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[200px] pr-16"
                           value={editData.content}
                           onChange={(e) => setEditData({ ...editData, content: e.target.value })}
                           placeholder="Pour your thoughts here..."
                         />
-                        <div className="absolute top-4 right-4">
+                        <div className="absolute bottom-4 right-4">
                           <VoiceInput 
                             onTranscript={(text) => setEditData(prev => ({ ...prev, content: prev.content + (prev.content.trim() ? " " : "") + text }))}
                           />
@@ -597,12 +597,12 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                            {isEditing ? (
                              <div className="relative group">
                                <textarea 
-                                 className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 font-cormorant text-lg text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[120px] pr-16"
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 pb-16 font-cormorant text-lg text-white italic leading-relaxed outline-none focus:border-beige/50 min-h-[120px] pr-16"
                                  value={editData.reflectionAnswer}
                                  onChange={(e) => setEditData({ ...editData, reflectionAnswer: e.target.value })}
                                  placeholder={t.common.reflectionAnswerPlaceholder}
                                />
-                               <div className="absolute top-4 right-4">
+                               <div className="absolute bottom-4 right-4">
                                  <VoiceInput 
                                    onTranscript={(text) => setEditData(prev => ({ ...prev, reflectionAnswer: prev.reflectionAnswer + (prev.reflectionAnswer.trim() ? " " : "") + text }))}
                                  />

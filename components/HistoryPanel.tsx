@@ -24,10 +24,16 @@ export default function HistoryPanel({ hideToggle, onSelect }: HistoryPanelProps
   useEffect(() => {
     const saved = localStorage.getItem('prokopton_history');
     if (saved) {
-      const data = JSON.parse(saved);
-      // Small delay to avoid synchronous state update in effect
-      const timer = setTimeout(() => setHistory(data), 0);
-      return () => clearTimeout(timer);
+      try {
+        const data = JSON.parse(saved);
+        if (Array.isArray(data)) {
+          // Small delay to avoid synchronous state update in effect
+          const timer = setTimeout(() => setHistory(data), 0);
+          return () => clearTimeout(timer);
+        }
+      } catch (e) {
+        console.error("Error parsing history", e);
+      }
     }
   }, [isOpen]); // Refresh when opened
 

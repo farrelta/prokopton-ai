@@ -47,7 +47,10 @@ export default function DailyReflections({ onReflect }: DailyReflectionsProps) {
       const savedLogs = localStorage.getItem('reflection_history_dates');
       if (savedLogs) {
         try {
-          dates = JSON.parse(savedLogs);
+          const parsed = JSON.parse(savedLogs);
+          if (Array.isArray(parsed)) {
+            dates = parsed;
+          }
         } catch (e) {
           console.error("Error parsing reflection history", e);
         }
@@ -202,7 +205,7 @@ export default function DailyReflections({ onReflect }: DailyReflectionsProps) {
                   value={reflectionInput}
                   onChange={(e) => setReflectionInput(e.target.value)}
                   placeholder="Write your reflection based on today's wisdom..."
-                  className="w-full bg-transparent text-sage placeholder-sage/30 resize-none outline-none min-h-[120px] mb-4 pr-16"
+                  className="w-full bg-transparent text-sage placeholder-sage/30 resize-none outline-none min-h-[140px] mb-4 pr-16 pb-12"
                 />
                 <div className="absolute top-6 right-6">
                   <VoiceInput 
