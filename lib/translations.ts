@@ -6,6 +6,7 @@ export const translations = {
     nav: {
       daily: 'Daily Reflections',
       library: 'Wisdom Library',
+      learning: 'Philosophy',
       home: 'Home',
       journal: 'Journals',
     },
@@ -82,6 +83,25 @@ export const translations = {
       capturedOn: 'Captured on',
       encryptedPrivate: 'Encrypted & Private',
       privacyStatement: 'Your thoughts are yours. Reflections are encrypted locally.',
+      lock: {
+        title: 'Journal Protection',
+        sub: 'Keep your reflections private with a secure boundary.',
+        enable: 'Enable Protection',
+        disable: 'Disable Protection',
+        setupPin: 'Set Your PIN',
+        enterPin: 'Enter PIN to Unlock',
+        wrongPin: 'Incorrect PIN. Try again calmly.',
+        locked: 'Reflections protected',
+        unlocked: 'Boundaries opened',
+        biometric: 'Use Device Security',
+        autoLock: 'Automatic Lock',
+        inactivity: 'Lock after inactivity',
+        placeholder: 'Enter 4-digit PIN',
+        setPinConfirm: 'Confirm your new PIN',
+        pinsDonMatch: 'PINs do not match. Please try again.',
+        pinSetSuccess: 'Privacy boundary established.',
+        securityOff: 'Privacy boundary removed.',
+      },
       voice: {
         holdToReflect: 'Hold to Reflect',
         speakThoughts: 'Speak your thoughts',
@@ -96,6 +116,56 @@ export const translations = {
       title: 'Wisdom Library',
       description: 'A curated collection of timeless insights, shuffled daily to offer new perspectives.',
       addToJournal: 'Add to Journal',
+    },
+    learning: {
+      title: 'Philosophy Learning',
+      sub: 'Explore timeless perspectives to find practical balance in daily life.',
+      explore: 'Explore',
+      practicalwisdom: 'Practical Wisdom',
+      philosophies: {
+        stoicism: {
+          title: 'Stoicism',
+          summary: 'Focus energy on what can actually be controlled.',
+          description: 'A school of Hellenistic philosophy that teaches the development of self-control and fortitude as a means of overcoming destructive emotions.',
+          focus: ['Emotional Resilience', 'Control', 'Internal Peace']
+        },
+        buddhism: {
+          title: 'Buddhism',
+          summary: 'Explore how attachment creates emotional suffering.',
+          description: 'A spiritual path that emphasizes mindfulness, compassion, and the understanding of impermanence to reach a state of enlightenment.',
+          focus: ['Mindful Detachment', 'Acceptance', 'Compassion']
+        },
+        taoism: {
+          title: 'Taoism',
+          summary: 'Encourage balance and acceptance rather than force.',
+          description: 'A philosophical and religious tradition that emphasizes living in harmony with the Tao (the "Way"), the source of everything that exists.',
+          focus: ['Natural Harmony', 'Balance', 'Going with the flow']
+        },
+        existentialism: {
+          title: 'Existentialism',
+          summary: 'The freedom to create meaning in uncertainty.',
+          description: 'A philosophical inquiry into the nature of the human condition, emphasizing individual existence, freedom, and choice.',
+          focus: ['Meaning', 'Freedom', 'Responsibility']
+        },
+        minimalism: {
+          title: 'Minimalism',
+          summary: 'Finding clarity through intentional focus.',
+          description: 'A philosophy of living with only the things you need, focusing on what brings value and meaning to your life.',
+          focus: ['Clarity', 'Intentionality', 'Simplicity']
+        },
+        humanistic_psychology: {
+          title: 'Humanistic Psychology',
+          summary: 'The path towards self-awareness and potential.',
+          description: 'A perspective that emphasizes looking at the whole individual and stresses concepts such as free will, self-efficacy, and self-actualization.',
+          focus: ['Self-awareness', 'Growth', 'Whole Person']
+        },
+        confucianism: {
+          title: 'Confucianism',
+          summary: 'Harmonious relationships and moral character.',
+          description: 'A system of philosophical and ethical teachings emphasizing family loyalty, social harmony, and the importance of tradition.',
+          focus: ['Harmony', 'Loyalty', 'Character']
+        }
+      }
     },
     reflection: {
       modeHeader: 'How shall we reflect today?',
@@ -167,6 +237,7 @@ export const translations = {
     nav: {
       daily: 'Refleksi Harian',
       library: 'Perpustakaan Hikmah',
+      learning: 'Filosofi',
       home: 'Beranda',
       journal: 'Jurnal',
     },
@@ -243,6 +314,25 @@ export const translations = {
       capturedOn: 'Diambil pada',
       encryptedPrivate: 'Terenkripsi & Pribadi',
       privacyStatement: 'Pikiran Anda adalah milik Anda. Refleksi dienkripsi secara lokal.',
+      lock: {
+        title: 'Perlindungan Jurnal',
+        sub: 'Jaga kerahasiaan refleksi Anda dengan batas yang aman.',
+        enable: 'Aktifkan Perlindungan',
+        disable: 'Matikan Perlindungan',
+        setupPin: 'Atur PIN Anda',
+        enterPin: 'Masukkan PIN untuk Membuka',
+        wrongPin: 'PIN salah. Coba lagi dengan tenang.',
+        locked: 'Refleksi terlindungi',
+        unlocked: 'Batas dibuka',
+        biometric: 'Gunakan Keamanan Perangkat',
+        autoLock: 'Kunci Otomatis',
+        inactivity: 'Kunci setelah tidak aktif',
+        placeholder: 'Masukkan 4 digit PIN',
+        setPinConfirm: 'Konfirmasi PIN baru Anda',
+        pinsDonMatch: 'PIN tidak cocok. Silakan coba lagi.',
+        pinSetSuccess: 'Batas privasi ditetapkan.',
+        securityOff: 'Batas privasi dihapus.',
+      },
       voice: {
         holdToReflect: 'Tahan untuk Berefleksi',
         speakThoughts: 'Bicarakan pemikiranmu',
@@ -257,6 +347,56 @@ export const translations = {
       title: 'Perpustakaan Hikmah',
       description: 'Kumpulan wawasan abadi yang dikuratori, diacak setiap hari untuk menawarkan perspektif baru.',
       addToJournal: 'Simpan ke Jurnal',
+    },
+    learning: {
+      title: 'Pembelajaran Filosofi',
+      sub: 'Jelajahi perspektif abadi untuk menemukan keseimbangan praktis dalam kehidupan sehari-hari.',
+      explore: 'Jelajahi',
+      practicalwisdom: 'Kebijaksanaan Praktis',
+      philosophies: {
+        stoicism: {
+          title: 'Stoikisme',
+          summary: 'Fokuskan energi pada apa yang sebenarnya bisa dikendalikan.',
+          description: 'Sekolah filsafat Helenistik yang mengajarkan pengembangan pengendalian diri dan ketabahan sebagai sarana untuk mengatasi emosi yang merusak.',
+          focus: ['Ketahanan Emosional', 'Kendali', 'Kedamaian Internal']
+        },
+        buddhism: {
+          title: 'Buddhisme',
+          summary: 'Pahami bagaimana kemelekatan menciptakan penderitaan emosional.',
+          description: 'Jalan spiritual yang menekankan kesadaran, kasih sayang, dan pemahaman tentang ketidakkekalan untuk mencapai pencerahan.',
+          focus: ['Pelepasan Berkesadaran', 'Penerimaan', 'Belas Kasih']
+        },
+        taoism: {
+          title: 'Taoisme',
+          summary: 'Dorong keseimbangan dan penerimaan daripada paksaan.',
+          description: 'Tradisi filosofis dan religius yang menekankan hidup selaras dengan Tao ("Jalan"), sumber dari segala sesuatu yang ada.',
+          focus: ['Harmoni Alami', 'Keseimbangan', 'Mengalir']
+        },
+        existentialism: {
+          title: 'Eksistensialisme',
+          summary: 'Kebebasan untuk menciptakan makna dalam ketidakpastian.',
+          description: 'Penyelidikan filosofis tentang hakikat kondisi manusia, yang menekankan keberadaan, kebebasan, dan pilihan individu.',
+          focus: ['Makna', 'Kebebasan', 'Tanggung Jawab']
+        },
+        minimalism: {
+          title: 'Minimalisme',
+          summary: 'Menemukan kejernihan melalui fokus yang disengaja.',
+          description: 'Filosofi hidup dengan hanya barang yang Anda butuhkan, berfokus pada apa yang memberi nilai dan makna bagi hidup Anda.',
+          focus: ['Kejernihan', 'Intensionalitas', 'Kesederhanaan']
+        },
+        humanistic_psychology: {
+          title: 'Psikologi Humanistik',
+          summary: 'Jalan menuju kesadaran diri dan potensi.',
+          description: 'Perspektif yang menekankan pada melihat individu secara utuh dan menekankan konsep seperti kehendak bebas, efikasi diri, dan aktualisasi diri.',
+          focus: ['Kesadaran Diri', 'Pertumbuhan', 'Utuh']
+        },
+        confucianism: {
+          title: 'Konfusianisme',
+          summary: 'Hubungan harmonis dan karakter moral.',
+          description: 'Sistem ajaran filosofis dan etis yang menekankan kesetiaan keluarga, harmoni sosial, dan pentingnya tradisi.',
+          focus: ['Harmoni', 'Kesetiaan', 'Karakter']
+        }
+      }
     },
     reflection: {
       modeHeader: 'Bagaimana kita akan berefleksi hari ini?',

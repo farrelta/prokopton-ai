@@ -7,10 +7,11 @@ import { Sparkles, ArrowDown, Home as HomeIcon, Calendar, BookOpen, Menu, X, Lan
 import HistoryPanel from '@/components/HistoryPanel';
 import DailyReflections from '@/components/DailyReflections';
 import WisdomLibrary from '@/components/WisdomLibrary';
+import PhilosophyLearning from '@/components/PhilosophyLearning';
 import Journal from '@/components/Journal';
 import { useLanguage } from '@/lib/LanguageContext';
 
-type Tab = 'home' | 'daily' | 'library' | 'journal';
+type Tab = 'home' | 'daily' | 'library' | 'journal' | 'learning';
 
 export default function Home() {
   const { t, language, setLanguage } = useLanguage();
@@ -20,17 +21,17 @@ export default function Home() {
   const footerRef = useRef<HTMLElement>(null);
   const [journalContext, setJournalContext] = useState<string | null>(null);
   const [greetingKey, setGreetingKey] = useState<'morning' | 'afternoon' | 'evening' | 'night'>('morning');
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
 
   useEffect(() => {
     const hour = new Date().getHours();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (hour >= 5 && hour < 12) setGreetingKey('morning');
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    else if (hour >= 12 && hour < 17) setGreetingKey('afternoon');
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    else if (hour >= 17 && hour < 21) setGreetingKey('evening');
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    else setGreetingKey('night');
+    const timer = setTimeout(() => {
+      if (hour >= 5 && hour < 12) setGreetingKey('morning');
+      else if (hour >= 12 && hour < 17) setGreetingKey('afternoon');
+      else if (hour >= 17 && hour < 21) setGreetingKey('evening');
+      else setGreetingKey('night');
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const scrollToReflect = (immediate = false) => {
@@ -128,59 +129,67 @@ export default function Home() {
       />
       
       {/* Header */}
-      <header className="relative z-50 flex justify-between items-center px-8 py-6">
-        <div className="flex items-center gap-12">
-          <div 
-            className="flex items-center gap-2 cursor-pointer" 
-            onClick={handleGoHome}
-          >
-            <div className="w-8 h-8 bg-beige rounded-full flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-forest"></div>
+      {!isSubModalOpen && (
+        <header className="relative z-50 flex justify-between items-center px-8 py-6">
+          <div className="flex items-center gap-12">
+            <div 
+              className="flex items-center gap-2 cursor-pointer" 
+              onClick={handleGoHome}
+            >
+              <div className="w-8 h-8 bg-beige rounded-full flex items-center justify-center">
+                <div className="w-4 h-4 rounded-full bg-forest"></div>
+              </div>
+              <h1 className="font-inter text-xl font-medium tracking-tight text-white">Prokopton</h1>
             </div>
-            <h1 className="font-inter text-xl font-medium tracking-tight text-white">Prokopton</h1>
+            <nav className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-widest font-bold text-sage">
+              <button 
+                onClick={() => setActiveTab('daily')} 
+                className={`transition-colors hover:text-white ${activeTab === 'daily' ? 'text-white' : 'text-sage'}`}
+              >
+                {t.nav.daily}
+              </button>
+              <button 
+                onClick={() => setActiveTab('library')} 
+                className={`transition-colors hover:text-white ${activeTab === 'library' ? 'text-white' : 'text-sage'}`}
+              >
+                {t.nav.library}
+              </button>
+              <button 
+                onClick={() => setActiveTab('learning')} 
+                className={`transition-colors hover:text-white ${activeTab === 'learning' ? 'text-white' : 'text-sage'}`}
+              >
+                {t.nav.learning}
+              </button>
+              <button 
+                onClick={() => setActiveTab('journal')} 
+                className={`transition-colors hover:text-white ${activeTab === 'journal' ? 'text-white' : 'text-sage'}`}
+              >
+                {t.nav.journal}
+              </button>
+            </nav>
           </div>
-          <nav className="hidden lg:flex items-center gap-8 text-[11px] uppercase tracking-widest font-bold text-sage">
-            <button 
-              onClick={() => setActiveTab('daily')} 
-              className={`transition-colors hover:text-white ${activeTab === 'daily' ? 'text-white' : 'text-sage'}`}
-            >
-              {t.nav.daily}
-            </button>
-            <button 
-              onClick={() => setActiveTab('library')} 
-              className={`transition-colors hover:text-white ${activeTab === 'library' ? 'text-white' : 'text-sage'}`}
-            >
-              {t.nav.library}
-            </button>
-            <button 
-              onClick={() => setActiveTab('journal')} 
-              className={`transition-colors hover:text-white ${activeTab === 'journal' ? 'text-white' : 'text-sage'}`}
-            >
-              {t.nav.journal}
-            </button>
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden lg:flex glass rounded-full p-1 border border-white/5">
-            <button 
-              onClick={() => setLanguage('en')}
-              className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${language === 'en' ? 'bg-beige text-forest' : 'text-sage hover:text-white'}`}
-            >
-              EN
-            </button>
-            <button 
-              onClick={() => setLanguage('id')}
-              className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${language === 'id' ? 'bg-beige text-forest' : 'text-sage hover:text-white'}`}
-            >
-              ID
-            </button>
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex glass rounded-full p-1 border border-white/5">
+              <button 
+                onClick={() => setLanguage('en')}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${language === 'en' ? 'bg-beige text-forest' : 'text-sage hover:text-white'}`}
+              >
+                EN
+              </button>
+              <button 
+                onClick={() => setLanguage('id')}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${language === 'id' ? 'bg-beige text-forest' : 'text-sage hover:text-white'}`}
+              >
+                ID
+              </button>
+            </div>
+            <div className="flex items-center space-x-2 glass px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold text-white/80">
+              <span className="w-2 h-2 rounded-full bg-green-400"></span>
+              <span>{t.common.aiActive}</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 glass px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold text-white/80">
-            <span className="w-2 h-2 rounded-full bg-green-400"></span>
-            <span>{t.common.aiActive}</span>
-          </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Main Content Area */}
       <div className="relative z-10 pb-15 lg:pb-12">
@@ -275,6 +284,19 @@ export default function Home() {
             </motion.div>
           )}
 
+          {activeTab === 'learning' && (
+            <motion.div
+              key="learning"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="pt-12"
+            >
+              <PhilosophyLearning onOpenChange={setIsSubModalOpen} />
+            </motion.div>
+          )}
+
           {activeTab === 'journal' && (
             <motion.div
               key="journal"
@@ -292,6 +314,7 @@ export default function Home() {
                   setJournalInitialText(null);
                   setJournalTitle(null);
                 }}
+                onOpenChange={setIsSubModalOpen}
               />
             </motion.div>
           )}
@@ -300,7 +323,7 @@ export default function Home() {
 
       {/* Mobile Floating Navigation */}
       <AnimatePresence>
-        {!isFooterVisible && (
+        {!isFooterVisible && !isSubModalOpen && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -348,6 +371,16 @@ export default function Home() {
                   <motion.button
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.35 }}
+                    onClick={() => selectTab('learning')}
+                    className={`p-4 rounded-2xl flex items-center gap-3 transition-all bg-forest border border-white/5 shadow-2xl ${activeTab === 'learning' ? 'border-beige text-white' : 'text-sage'}`}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">{t.nav.learning}</span>
+                    <Sparkles className="w-5 h-5" />
+                  </motion.button>
+                  <motion.button
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 }}
                     onClick={() => selectTab('journal')}
                     className={`p-4 rounded-2xl flex items-center gap-3 transition-all bg-forest border border-white/5 shadow-2xl ${activeTab === 'journal' ? 'border-beige text-white' : 'text-sage'}`}
@@ -389,13 +422,15 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer ref={footerRef} className="relative z-10 py-12 px-8 border-t border-stone-200/50 mt-15">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-8">
-          <div className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
-            {t.footer.copyright}
+      {!isSubModalOpen && (
+        <footer ref={footerRef} className="relative z-10 py-12 px-8 border-t border-stone-200/50 mt-15">
+          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-8">
+            <div className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">
+              {t.footer.copyright}
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </main>
   );
 }

@@ -4,15 +4,17 @@ import { Book, Trash2, Calendar, ChevronRight, History, Plus, Edit3, Save, X, Sp
 import { useLanguage } from '@/lib/LanguageContext';
 import { getJournal, JournalEntry, deleteFromJournal, saveToJournal, updateJournalEntry, analyzeJournalHistory, getAIJournalAnalysis, JournalAnalysis, getStoredAnalysis } from '@/lib/journal';
 import VoiceInput from './VoiceInput';
+import JournalLock from './JournalLock';
 
 interface JournalProps {
   onLoadContext: (text: string, title?: string) => void;
   initialText?: string;
   initialTitle?: string;
   onClearInitial?: () => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export default function Journal({ onLoadContext, initialText, initialTitle, onClearInitial }: JournalProps) {
+export default function Journal({ onLoadContext, initialText, initialTitle, onClearInitial, onOpenChange }: JournalProps) {
   const { t, language } = useLanguage();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
@@ -26,7 +28,31 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
   const [aiAnalysis, setAiAnalysis] = useState<JournalAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasRequestedAnalysis, setHasRequestedAnalysis] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockEnabled, setLockEnabled] = useState(false);
+  const [showLockSettings, setShowLockSettings] = useState(false);
+  const [autoLockEnabled, setAutoLockEnabled] = useState(false);
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [pinStep, setPinStep] = useState<'off' | 'set' | 'confirm'>('off');
   const processedInitialRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (showLockSettings) {
+      document.body.style.overflow = 'hidden';
+      onOpenChange?.(true);
+    } else if (isLocked) {
+      document.body.style.overflow = 'hidden';
+      onOpenChange?.(false);
+    } else {
+      document.body.style.overflow = 'unset';
+      onOpenChange?.(false);
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+      onOpenChange?.(false);
+    };
+  }, [isLocked, showLockSettings, onOpenChange]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -37,9 +63,82 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
       if (stored) {
         setAiAnalysis(stored);
       }
+
+      // Check lock status
+      const enabled = localStorage.getItem('prokopton_lock_enabled') === 'true';
+      const autoLock = localStorage.getItem('prokopton_auto_lock') === 'true';
+      setLockEnabled(enabled);
+      setAutoLockEnabled(autoLock);
+      if (enabled) {
+        setIsLocked(true);
+      }
     };
     loadData();
   }, []);
+
+  // Inactivity lock logic
+  useEffect(() => {
+    if (!lockEnabled || !autoLockEnabled) return;
+
+    let timeout: NodeJS.Timeout;
+    const resetTimer = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setIsLocked(true);
+      }, 5 * 60 * 1000); // 5 minutes inactivity
+    };
+
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    resetTimer();
+
+    return () => {
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      clearTimeout(timeout);
+    };
+  }, [lockEnabled, autoLockEnabled]);
+
+  const handleToggleLock = () => {
+    if (lockEnabled) {
+      // Disable protection
+      localStorage.removeItem('prokopton_lock_enabled');
+      localStorage.removeItem('prokopton_journal_pin');
+      localStorage.removeItem('prokopton_auto_lock');
+      setLockEnabled(false);
+      setAutoLockEnabled(false);
+      setPinStep('off');
+    } else {
+      setPinStep('set');
+    }
+  };
+
+  const handleToggleAutoLock = () => {
+    const newState = !autoLockEnabled;
+    setAutoLockEnabled(newState);
+    localStorage.setItem('prokopton_auto_lock', newState.toString());
+  };
+
+  const handleSetPin = () => {
+    if (newPin.length === 4) {
+      setPinStep('confirm');
+    }
+  };
+
+  const handleConfirmPin = () => {
+    if (newPin === confirmPin) {
+      localStorage.setItem('prokopton_lock_enabled', 'true');
+      localStorage.setItem('prokopton_journal_pin', newPin);
+      setLockEnabled(true);
+      setPinStep('off');
+      setNewPin('');
+      setConfirmPin('');
+    } else {
+      setConfirmPin('');
+      setPinStep('set');
+      // maybe add error toast here
+    }
+  };
 
   // Handle initial text from other pages (like Wisdom Library)
   useEffect(() => {
@@ -174,6 +273,12 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      <AnimatePresence>
+        {isLocked && (
+          <JournalLock onUnlock={() => setIsLocked(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Periodic Perspective Section */}
       <AnimatePresence>
         {entries.length >= 5 ? (
@@ -388,10 +493,13 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                 <h2 className="serif text-3xl text-white italic">{t.common.timeline}</h2>
               </div>
               <div className="flex items-center gap-2">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[9px] font-bold text-sage/40 uppercase tracking-widest">
-                  <ShieldCheck className="w-3 h-3" />
-                  {t.common.encryptedPrivate}
-                </div>
+                <button 
+                  onClick={() => setShowLockSettings(true)}
+                  className={`p-2 rounded-full border transition-all ${lockEnabled ? 'bg-beige/10 border-beige/20 text-beige' : 'bg-white/5 border-white/5 text-sage/40 hover:text-sage'}`}
+                  title={t.common.lock.title}
+                >
+                  <ShieldCheck className="w-5 h-5" />
+                </button>
                 <button 
                   onClick={handleCreateNew}
                   className="p-2 bg-beige/10 hover:bg-beige/20 text-beige rounded-full border border-beige/20 transition-all"
@@ -748,6 +856,141 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Privacy Settings Modal */}
+      <AnimatePresence>
+        {showLockSettings && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLockSettings(false)}
+              className="absolute inset-0 bg-forest/80 backdrop-blur-md"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md glass p-8 rounded-[40px] border border-white/10 shadow-2xl space-y-8"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-beige/10 rounded-2xl flex items-center justify-center text-beige">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="serif text-2xl text-beige italic">{t.common.lock.title}</h3>
+                    <p className="text-sage/60 text-[10px] uppercase tracking-widest font-bold">Privacy Boundaries</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowLockSettings(false)} className="text-sage hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {lockEnabled && (
+                  <div className="flex items-center justify-between p-6 bg-white/5 rounded-3xl border border-white/5">
+                    <div className="space-y-1">
+                      <p className="text-white font-medium">{t.common.lock.autoLock}</p>
+                      <p className="text-sage/40 text-[10px] uppercase tracking-widest font-bold">{t.common.lock.inactivity}</p>
+                    </div>
+                    <button 
+                      onClick={handleToggleAutoLock}
+                      className={`w-12 h-6 rounded-full relative p-1 transition-colors ${autoLockEnabled ? 'bg-beige' : 'bg-white/10'}`}
+                    >
+                      <motion.div 
+                        animate={{ x: autoLockEnabled ? 24 : 0 }}
+                        className={`w-4 h-4 rounded-full shadow-sm transition-colors ${autoLockEnabled ? 'bg-forest' : 'bg-sage/40'}`} 
+                      />
+                    </button>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <button
+                    onClick={handleToggleLock}
+                    className={`w-full py-4 rounded-full font-bold text-xs uppercase tracking-widest transition-all ${
+                      lockEnabled 
+                        ? 'bg-red-500/10 text-red-300 border border-red-500/20' 
+                        : 'bg-beige text-forest'
+                    }`}
+                  >
+                    {lockEnabled ? t.common.lock.disable : t.common.lock.enable}
+                  </button>
+
+                  {pinStep !== 'off' && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="space-y-4 pt-4 border-t border-white/5"
+                    >
+                      <p className="text-sage/60 text-xs text-center italic font-cormorant">
+                        {pinStep === 'set' ? t.common.lock.setupPin : t.common.lock.setPinConfirm}
+                      </p>
+                      
+                      <div className="flex justify-center gap-3">
+                        {(pinStep === 'set' ? newPin : confirmPin).split('').map((_, i) => (
+                          <div key={i} className="w-2 h-2 rounded-full bg-beige" />
+                        ))}
+                        {Array.from({ length: 4 - (pinStep === 'set' ? newPin.length : confirmPin.length) }).map((_, i) => (
+                          <div key={i} className="w-2 h-2 rounded-full bg-white/10" />
+                        ))}
+                      </div>
+
+                      <div className="grid grid-cols-5 gap-2">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((n) => (
+                          <button
+                            key={n}
+                            onClick={() => {
+                              if (pinStep === 'set') {
+                                if (newPin.length < 4) setNewPin(prev => prev + n);
+                              } else {
+                                if (confirmPin.length < 4) setConfirmPin(prev => prev + n);
+                              }
+                            }}
+                            className="p-2 aspect-square rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs font-serif transition-all"
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex gap-2">
+                         <button
+                           onClick={() => pinStep === 'set' ? handleSetPin() : handleConfirmPin()}
+                           disabled={(pinStep === 'set' ? newPin.length : confirmPin.length) < 4}
+                           className="flex-1 py-3 bg-white/10 text-white rounded-full text-[10px] font-bold uppercase tracking-widest disabled:opacity-30"
+                         >
+                           {pinStep === 'set' ? 'Next' : 'Confirm'}
+                         </button>
+                         <button
+                           onClick={() => {
+                             setPinStep('off');
+                             setNewPin('');
+                             setConfirmPin('');
+                           }}
+                           className="flex-1 py-3 border border-white/10 text-white rounded-full text-[10px] font-bold uppercase tracking-widest"
+                         >
+                           Cancel
+                         </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-4 text-center">
+                 <p className="text-sage/30 text-[9px] uppercase tracking-widest leading-relaxed">
+                   {t.common.privacyStatement}
+                 </p>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
