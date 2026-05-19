@@ -1,4 +1,5 @@
 import { PhilosophyMode, ReflectionResponse } from './gemini';
+import { encryptData, decryptData } from './security';
 
 export interface JournalEntry {
   id: string;
@@ -10,33 +11,52 @@ export interface JournalEntry {
   result?: ReflectionResponse;
 }
 
-export const getJournal = (): JournalEntry[] => {
+export const getJournal = async (): Promise<JournalEntry[]> => {
   if (typeof window === 'undefined') return [];
   const saved = localStorage.getItem('prokopton_journal');
-  return saved ? JSON.parse(saved) : [];
+  if (!saved) return [];
+
+  // Migration and Decryption
+  if (saved.startsWith('[')) {
+    // Old plain text format
+    return JSON.parse(saved);
+  }
+
+  try {
+    const decrypted = await decryptData(saved);
+    return JSON.parse(decrypted);
+  } catch (e) {
+    console.error('Failed to parse journal:', e);
+    return [];
+  }
 };
 
-export const saveToJournal = (entry: Omit<JournalEntry, 'id' | 'timestamp'>): JournalEntry => {
+export const saveToJournal = async (entry: Omit<JournalEntry, 'id' | 'timestamp'>): Promise<JournalEntry> => {
   const newEntry: JournalEntry = {
     ...entry,
     id: Math.random().toString(36).substr(2, 9),
     timestamp: new Date().toISOString(),
   };
   
-  const journal = getJournal();
-  localStorage.setItem('prokopton_journal', JSON.stringify([newEntry, ...journal]));
+  const journal = await getJournal();
+  const updatedJournal = [newEntry, ...journal];
+  const encrypted = await encryptData(JSON.stringify(updatedJournal));
+  localStorage.setItem('prokopton_journal', encrypted);
   return newEntry;
 };
 
-export const updateJournalEntry = (id: string, updates: Partial<JournalEntry>) => {
-  const journal = getJournal();
+export const updateJournalEntry = async (id: string, updates: Partial<JournalEntry>) => {
+  const journal = await getJournal();
   const updated = journal.map(entry => entry.id === id ? { ...entry, ...updates } : entry);
-  localStorage.setItem('prokopton_journal', JSON.stringify(updated));
+  const encrypted = await encryptData(JSON.stringify(updated));
+  localStorage.setItem('prokopton_journal', encrypted);
 };
 
-export const deleteFromJournal = (id: string) => {
-  const journal = getJournal();
-  localStorage.setItem('prokopton_journal', JSON.stringify(journal.filter(e => e.id !== id)));
+export const deleteFromJournal = async (id: string) => {
+  const journal = await getJournal();
+  const filtered = journal.filter(e => e.id !== id);
+  const encrypted = await encryptData(JSON.stringify(filtered));
+  localStorage.setItem('prokopton_journal', encrypted);
 };
 
 export interface JournalAnalysis {
@@ -49,14 +69,24 @@ export interface JournalAnalysis {
   entryCountAtAnalysis: number;
 }
 
-export const getStoredAnalysis = (): JournalAnalysis | null => {
+export const getStoredAnalysis = async (): Promise<JournalAnalysis | null> => {
   if (typeof window === 'undefined') return null;
   const saved = localStorage.getItem('prokopton_analysis');
-  return saved ? JSON.parse(saved) : null;
+  if (!saved) return null;
+
+  if (saved.startsWith('{')) return JSON.parse(saved);
+
+  try {
+    const decrypted = await decryptData(saved);
+    return JSON.parse(decrypted);
+  } catch (e) {
+    return null;
+  }
 };
 
-export const saveAnalysis = (analysis: JournalAnalysis) => {
-  localStorage.setItem('prokopton_analysis', JSON.stringify(analysis));
+export const saveAnalysis = async (analysis: JournalAnalysis) => {
+  const encrypted = await encryptData(JSON.stringify(analysis));
+  localStorage.setItem('prokopton_analysis', encrypted);
 };
 
 export async function getAIJournalAnalysis(journal: JournalEntry[], language: string = 'en'): Promise<JournalAnalysis | null> {

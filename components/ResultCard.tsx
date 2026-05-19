@@ -28,10 +28,11 @@ export default function ResultCard({ input, mode, result, forceTitle, onBack, on
     // Only check if we are NOT in a forced context (like daily reflection revisit)
     if (forceTitle) return;
     
-    const journal = getJournal();
-    const existing = journal.find(e => e.input === input && e.mode === mode);
-    // Remove automatic isSaved setting to allow consistent UI state
-    // and let user save multiple times if they wish as requested
+    const checkExisting = async () => {
+      const journal = await getJournal();
+      const existing = journal.find(e => e.input === input && e.mode === mode);
+    };
+    checkExisting();
   }, [input, mode, forceTitle]);
 
   useEffect(() => {
@@ -44,8 +45,8 @@ export default function ResultCard({ input, mode, result, forceTitle, onBack, on
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSave = () => {
-    saveToJournal({ 
+  const handleSave = async () => {
+    await saveToJournal({ 
       title: forceTitle || result.entryTitle,
       input, 
       mode, 

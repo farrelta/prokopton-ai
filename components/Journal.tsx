@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Book, Trash2, Calendar, ChevronRight, History, Plus, Edit3, Save, X, Sparkles } from 'lucide-react';
+import { Book, Trash2, Calendar, ChevronRight, History, Plus, Edit3, Save, X, Sparkles, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getJournal, JournalEntry, deleteFromJournal, saveToJournal, updateJournalEntry, analyzeJournalHistory, getAIJournalAnalysis, JournalAnalysis, getStoredAnalysis } from '@/lib/journal';
 
@@ -24,14 +24,16 @@ export default function Journal({ onLoadContext }: JournalProps) {
   const [hasRequestedAnalysis, setHasRequestedAnalysis] = useState(false);
 
   useEffect(() => {
-    const journal = getJournal();
-    setEntries(journal); // eslint-disable-line react-hooks/set-state-in-effect
-    
-    // Load stored analysis
-    const stored = getStoredAnalysis();
-    if (stored) {
-      setAiAnalysis(stored);
-    }
+    const loadData = async () => {
+      const journal = await getJournal();
+      setEntries(journal);
+      
+      const stored = await getStoredAnalysis();
+      if (stored) {
+        setAiAnalysis(stored);
+      }
+    };
+    loadData();
   }, []);
 
   const handleRequestAnalysis = () => {
@@ -73,9 +75,9 @@ export default function Journal({ onLoadContext }: JournalProps) {
     setEntryToDelete(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (entryToDelete) {
-      deleteFromJournal(entryToDelete);
+      await deleteFromJournal(entryToDelete);
       setEntries(entries.filter(entry => entry.id !== entryToDelete));
       if (selectedEntry?.id === entryToDelete) setSelectedEntry(null);
       setEntryToDelete(null);
@@ -86,12 +88,12 @@ export default function Journal({ onLoadContext }: JournalProps) {
     setEntryToDelete(null);
   };
 
-  const handleCreateNew = () => {
+  const handleCreateNew = async () => {
     const newEntry = {
       title: 'New contemplation',
       input: '',
     };
-    const saved = saveToJournal(newEntry);
+    const saved = await saveToJournal(newEntry);
     setEntries([saved, ...entries]);
     setSelectedEntry(saved);
     setIsEditing(true);
@@ -108,11 +110,11 @@ export default function Journal({ onLoadContext }: JournalProps) {
     });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!selectedEntry) return;
 
     if (!editData.content.trim()) {
-      deleteFromJournal(selectedEntry.id);
+      await deleteFromJournal(selectedEntry.id);
       setEntries(entries.filter(e => e.id !== selectedEntry.id));
       setSelectedEntry(null);
       setIsEditing(false);
@@ -124,7 +126,7 @@ export default function Journal({ onLoadContext }: JournalProps) {
       input: editData.content,
       reflectionAnswer: editData.reflectionAnswer
     };
-    updateJournalEntry(selectedEntry.id, updates);
+    await updateJournalEntry(selectedEntry.id, updates);
     
     const updatedEntries = entries.map(e => e.id === selectedEntry.id ? { ...e, ...updates } : e);
     setEntries(updatedEntries);
@@ -132,9 +134,9 @@ export default function Journal({ onLoadContext }: JournalProps) {
     setIsEditing(false);
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = async () => {
     if (selectedEntry && !selectedEntry.input.trim()) {
-      deleteFromJournal(selectedEntry.id);
+      await deleteFromJournal(selectedEntry.id);
       setEntries(entries.filter(e => e.id !== selectedEntry.id));
       setSelectedEntry(null);
     }
@@ -333,13 +335,19 @@ export default function Journal({ onLoadContext }: JournalProps) {
                 </div>
                 <h2 className="serif text-3xl text-white italic">{t.common.timeline}</h2>
               </div>
-              <button 
-                onClick={handleCreateNew}
-                className="p-2 bg-beige/10 hover:bg-beige/20 text-beige rounded-full border border-beige/20 transition-all"
-                title={t.common.addEntry}
-              >
-                <Plus className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[9px] font-bold text-sage/40 uppercase tracking-widest">
+                  <ShieldCheck className="w-3 h-3" />
+                  {t.common.encryptedPrivate}
+                </div>
+                <button 
+                  onClick={handleCreateNew}
+                  className="p-2 bg-beige/10 hover:bg-beige/20 text-beige rounded-full border border-beige/20 transition-all"
+                  title={t.common.addEntry}
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <p className="text-sage font-cormorant text-sm uppercase tracking-widest">{t.common.journalSub}</p>
           </header>

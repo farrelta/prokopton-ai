@@ -78,6 +78,8 @@ export const translations = {
       seekPatterns: 'Seek Reflection Patterns',
       updatePatterns: 'Update Patterns',
       capturedOn: 'Captured on',
+      encryptedPrivate: 'Encrypted & Private',
+      privacyStatement: 'Your thoughts are yours. Reflections are encrypted locally.',
     },
     library: {
       archive: 'Archive of Perspective',
@@ -226,6 +228,8 @@ export const translations = {
       seekPatterns: 'Cari Pola Refleksi',
       updatePatterns: 'Perbarui Pola',
       capturedOn: 'Diambil pada',
+      encryptedPrivate: 'Terenkripsi & Pribadi',
+      privacyStatement: 'Pikiran Anda adalah milik Anda. Refleksi dienkripsi secara lokal.',
     },
     library: {
       archive: 'Arsip Perspektif',

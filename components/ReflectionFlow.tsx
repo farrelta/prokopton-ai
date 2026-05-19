@@ -28,10 +28,13 @@ export default function ReflectionFlow({ initialInput, initialTitle, onClearedCo
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    const journal = getJournal();
-    if (journal.length > 0) {
-      setLastJournalEntry(journal[0].input); // eslint-disable-line react-hooks/set-state-in-effect
-    }
+    const loadLastEntry = async () => {
+      const journal = await getJournal();
+      if (journal.length > 0) {
+        setLastJournalEntry(journal[0].input);
+      }
+    };
+    loadLastEntry();
   }, [setLastJournalEntry]);
 
   useEffect(() => {
@@ -90,7 +93,7 @@ export default function ReflectionFlow({ initialInput, initialTitle, onClearedCo
 
     setStep('loading');
     try {
-      const journal = getJournal();
+      const journal = await getJournal();
       const historyContext = journal
         .filter(e => !!e.result)
         .slice(0, 5)
@@ -224,22 +227,31 @@ export default function ReflectionFlow({ initialInput, initialTitle, onClearedCo
               </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-              <button 
-                onClick={() => setStep('mode')}
-                className="text-sage hover:text-white font-semibold uppercase text-xs tracking-widest transition-colors"
-              >
-                {t.reflection.changeLens}
-              </button>
-              
-              <button
-                disabled={!input.trim()}
-                onClick={() => handleStartReflecting()}
-                className="w-full lg:w-auto px-12 py-5 rounded-full bg-beige disabled:bg-stone-700 text-forest font-semibold text-lg flex items-center justify-center gap-3 transition-colors shadow-xl shadow-black/20"
-              >
-                {t.reflection.getPerspective}
-                <Sparkles className="w-5 h-5" />
-              </button>
+            <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-6">
+                <button 
+                  onClick={() => setStep('mode')}
+                  className="text-sage hover:text-white font-semibold uppercase text-xs tracking-widest transition-colors"
+                >
+                  {t.reflection.changeLens}
+                </button>
+                
+                <button
+                  disabled={!input.trim()}
+                  onClick={() => handleStartReflecting()}
+                  className="w-full lg:w-auto px-12 py-5 rounded-full bg-beige disabled:bg-stone-700 text-forest font-semibold text-lg flex items-center justify-center gap-3 transition-colors shadow-xl shadow-black/20"
+                >
+                  {t.reflection.getPerspective}
+                  <Sparkles className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 opacity-30">
+                <Shield className="w-3 h-3 text-sage" />
+                <span className="text-[10px] font-bold text-sage uppercase tracking-widest">
+                  {t.common.privacyStatement}
+                </span>
+              </div>
             </div>
           </motion.div>
         )}
