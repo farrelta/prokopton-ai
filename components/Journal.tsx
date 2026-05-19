@@ -220,14 +220,31 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                       </div>
                     </div>
                     
-                    {aiAnalysis && !isAnalyzing && canRequestNewAnalysis && (
-                      <button 
-                        onClick={handleRequestAnalysis}
-                        className="text-[10px] flex items-center gap-2 text-beige/50 hover:text-beige transition-colors uppercase tracking-widest font-bold"
-                      >
-                        <History className="w-3 h-3" />
-                        {t.common.updatePatterns}
-                      </button>
+                    {aiAnalysis && !isAnalyzing && (
+                      <div className="flex items-center gap-4">
+                        {canRequestNewAnalysis ? (
+                          <button 
+                            onClick={handleRequestAnalysis}
+                            className="text-[10px] flex items-center gap-2 text-beige hover:text-white transition-colors uppercase tracking-widest font-bold bg-white/5 px-3 py-1 rounded-full border border-beige/20"
+                          >
+                            <Sparkles className="w-3 h-3" />
+                            {t.common.updatePatterns}
+                          </button>
+                        ) : (
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-[9px] text-sage/40 uppercase tracking-widest font-bold">
+                              {5 - entriesSinceLastAnalysis} {t.common.reflectionsNeeded}
+                            </span>
+                            <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(entriesSinceLastAnalysis / 5) * 100}%` }}
+                                className="h-full bg-beige/30"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -246,11 +263,19 @@ export default function Journal({ onLoadContext, initialText, initialTitle, onCl
                         <>
                           <div className="space-y-2">
                              <p className="text-white/80 font-cormorant text-xl italic leading-relaxed max-w-2xl">
-                               &ldquo;{aiAnalysis.summary}&rdquo;
+                                &ldquo;{aiAnalysis.summary}&rdquo;
                              </p>
-                             <p className="text-[10px] text-sage/30 uppercase tracking-widest">
-                               {t.common.capturedOn} {new Date(aiAnalysis.timestamp).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' })}
-                             </p>
+                             <div className="flex items-center gap-4">
+                               <p className="text-[10px] text-sage/30 uppercase tracking-widest">
+                                 {t.common.capturedOn} {new Date(aiAnalysis.timestamp).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' })}
+                               </p>
+                               {!canRequestNewAnalysis && (
+                                 <div className="flex items-center gap-1 opacity-40">
+                                   <div className="w-1 h-1 rounded-full bg-sage" />
+                                   <p className="text-[9px] text-sage uppercase tracking-widest">{t.common.analysisCondition}</p>
+                                 </div>
+                               )}
+                             </div>
                           </div>
 
                           <div className="grid sm:grid-cols-2 gap-8">
