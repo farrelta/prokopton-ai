@@ -15,11 +15,16 @@ interface HistoryItem {
 interface HistoryPanelProps {
   hideToggle?: boolean;
   onSelect?: (text: string) => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export default function HistoryPanel({ hideToggle, onSelect }: HistoryPanelProps) {
+export default function HistoryPanel({ hideToggle, onSelect, onOpenChange }: HistoryPanelProps) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   useEffect(() => {
     const saved = localStorage.getItem('prokopton_history');

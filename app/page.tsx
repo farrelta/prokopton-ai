@@ -9,6 +9,7 @@ import DailyReflections from '@/components/DailyReflections';
 import WisdomLibrary from '@/components/WisdomLibrary';
 import PhilosophyLearning from '@/components/PhilosophyLearning';
 import Journal from '@/components/Journal';
+import MusicPlayer from '@/components/MusicPlayer';
 import { useLanguage } from '@/lib/LanguageContext';
 
 type Tab = 'home' | 'daily' | 'library' | 'journal' | 'learning';
@@ -22,6 +23,7 @@ export default function Home() {
   const [journalContext, setJournalContext] = useState<string | null>(null);
   const [greetingKey, setGreetingKey] = useState<'morning' | 'afternoon' | 'evening' | 'night'>('morning');
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -126,7 +128,11 @@ export default function Home() {
       <HistoryPanel 
         hideToggle={isFooterVisible || activeTab !== 'home'} 
         onSelect={handleLoadContext}
+        onOpenChange={setIsHistoryOpen}
       />
+      
+      {/* Ambient Music Player - Persistent on all tabs */}
+      <MusicPlayer isHidden={isHistoryOpen || isSubModalOpen || isFooterVisible} isLowered={activeTab !== 'home'} />
       
       {/* Header */}
       {!isSubModalOpen && (
