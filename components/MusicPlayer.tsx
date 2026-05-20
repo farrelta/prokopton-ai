@@ -106,7 +106,7 @@ export default function MusicPlayer({ isHidden = false, isLowered = false }: { i
             initial={{ opacity: 0, scale: 0.9, y: 10, x: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 10, x: -10 }}
-            className="w-72 glass p-6 rounded-[32px] border border-white/10 shadow-2xl space-y-6"
+            className="w-72 bg-forest/80 backdrop-blur-xl p-6 rounded-[32px] border border-white/10 shadow-2xl space-y-6"
           >
             {/* Header */}
             <div className="flex justify-between items-center">
