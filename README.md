@@ -42,7 +42,3 @@ Prokopton AI is an AI Studio / Gemini-powered TypeScript application that provid
    ```bash
    npm run dev
    ```
-
-## Notes
-
-- If you change the app behavior, make sure your Cloud Run deployment is updated with the latest build.
