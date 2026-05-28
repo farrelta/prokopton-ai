@@ -1,20 +1,48 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+  <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# Run and deploy your AI Studio app
+# Prokopton AI
 
-This contains everything you need to run your app locally.
+AI-powered web app built for the **#juaravibecoding** competition.
 
-View your app in AI Studio: https://ai.studio/apps/54d93193-7fec-43f3-8052-fb05b75e29ef
+## Live Demo
 
-## Run Locally
+The app is live on **Google Cloud (Cloud Run)**:
 
-**Prerequisites:**  Node.js
+- https://prokopton-998176570919.asia-southeast1.run.app/
 
+## What this app does
+
+Prokopton AI is an AI Studio / Gemini-powered TypeScript application that provides a simple web interface for interacting with an AI model. It’s designed to be easy to run locally, then deploy as a containerized app on Google Cloud.
+
+## Tech Stack
+
+- TypeScript
+- Node.js
+- Gemini (Google AI) API
+- Google Cloud Run (deployment)
+
+## Run locally
+
+**Prerequisites:** Node.js
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+
+   ```bash
+   npm install
+   ```
+
+2. Create/set your environment variables (Gemini API key):
+
+   - Set `GEMINI_API_KEY` in `.env.local`
+
+3. Start the dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+## Notes
+
+- If you change the app behavior, make sure your Cloud Run deployment is updated with the latest build.
